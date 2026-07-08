@@ -1,6 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/link_item.dart';
@@ -110,6 +109,157 @@ class LinkCard extends StatelessWidget {
     if (confirmed == true) onDismissed();
   }
 
+  void _showActionMenu(BuildContext context) {
+    final overlay = Overlay.of(context);
+    OverlayEntry? entry;
+    const panelWidth = 168.0;
+    const panelHeight = 96.0;
+    const margin = 8.0;
+
+    final renderBox = context.findRenderObject() as RenderBox?;
+    final screenSize = MediaQuery.of(context).size;
+    final padding = MediaQuery.of(context).padding;
+
+    double x, y;
+    if (renderBox != null && renderBox.hasSize) {
+      final pos = renderBox.localToGlobal(Offset.zero);
+      final size = renderBox.size;
+      x = pos.dx + (size.width - panelWidth) / 2;
+      y = pos.dy + size.height + margin;
+      if (x < padding.left + margin) {
+        x = padding.left + margin;
+      } else if (x + panelWidth >
+          screenSize.width - padding.right - margin) {
+        x = screenSize.width - padding.right - margin - panelWidth;
+      }
+      if (y + panelHeight >
+          screenSize.height - padding.bottom - margin) {
+        y = pos.dy - panelHeight - margin;
+      }
+    } else {
+      x = (screenSize.width - panelWidth) / 2;
+      y = (screenSize.height - panelHeight) / 2;
+    }
+
+    entry = OverlayEntry(
+      builder: (ctx) {
+        final mediaQuery = MediaQuery.of(ctx);
+        return Stack(
+          children: [
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => entry?.remove(),
+              child: SizedBox(
+                width: mediaQuery.size.width,
+                height: mediaQuery.size.height,
+              ),
+            ),
+            Positioned(
+              left: x,
+              top: y,
+              child: Material(
+                color: Colors.transparent,
+                child: Container(
+                  width: panelWidth,
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: VoidColors.darkBgSurface,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: VoidColors.darkBorder),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x66000000),
+                        blurRadius: 12,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      InkWell(
+                        onTap: () {
+                          entry?.remove();
+                          _openEditSheet(context);
+                        },
+                        borderRadius: BorderRadius.circular(8),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 10,
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.edit,
+                                size: 20,
+                                color: VoidColors.darkAccent,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  t('linkCard.editTooltip'),
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: VoidColors.darkTextPrimary,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Divider(
+                        height: 1,
+                        thickness: 1,
+                        color: VoidColors.darkBorder,
+                      ),
+                      InkWell(
+                        onTap: () {
+                          entry?.remove();
+                          _confirmAndDelete(context);
+                        },
+                        borderRadius: BorderRadius.circular(8),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 10,
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.delete,
+                                size: 20,
+                                color: VoidColors.darkStatusError,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  t('common.delete'),
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: VoidColors.darkStatusError,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+    overlay.insert(entry);
+  }
+
   @override
   Widget build(BuildContext context) {
     // In selectable mode, wrap with a simple checkable tile — no swipe-to-delete
@@ -160,34 +310,8 @@ class LinkCard extends StatelessWidget {
       );
     }
 
-    return Slidable(
-      key: Key('${keyPrefix ?? ''}${link.id}'),
-      endActionPane: ActionPane(
-        motion: const DrawerMotion(),
-        extentRatio: 0.45,
-        children: [
-          SlidableAction(
-            onPressed: (_) => _openEditSheet(context),
-            backgroundColor: VoidColors.darkBgElevated,
-            foregroundColor: VoidColors.darkTextPrimary,
-            icon: Icons.edit,
-            label: t('linkCard.editTooltip'),
-            borderRadius: const BorderRadius.horizontal(
-              left: Radius.circular(12),
-            ),
-          ),
-          SlidableAction(
-            onPressed: (_) => _confirmAndDelete(context),
-            backgroundColor: VoidColors.darkStatusError,
-            foregroundColor: Colors.white,
-            icon: Icons.delete,
-            label: t('common.delete'),
-            borderRadius: const BorderRadius.horizontal(
-              right: Radius.circular(12),
-            ),
-          ),
-        ],
-      ),
+    return GestureDetector(
+      onLongPress: () => _showActionMenu(context),
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 3),
         decoration: BoxDecoration(

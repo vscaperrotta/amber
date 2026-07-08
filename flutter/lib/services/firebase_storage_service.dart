@@ -6,7 +6,7 @@ import '../models/collection_item.dart';
 // Settings stored at /users/{uid}/links/__settings__ — covered by existing Firestore rules.
 
 class FirebaseStorageService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  FirebaseFirestore get _firestore => FirebaseFirestore.instance;
 
   CollectionReference<Map<String, dynamic>> _userLinksCollection(String uid) {
     return _firestore.collection('users').doc(uid).collection('links');

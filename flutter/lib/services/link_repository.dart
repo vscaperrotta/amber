@@ -8,7 +8,14 @@ class LinkRepository {
   final LocalStorageService _localStorage = LocalStorageService();
   final FirebaseStorageService _firebaseStorage = FirebaseStorageService();
 
-  User? get _currentUser => FirebaseAuth.instance.currentUser;
+  User? get _currentUser {
+    try {
+      return FirebaseAuth.instance.currentUser;
+    } catch (_) {
+      return null;
+    }
+  }
+
   bool get isLoggedIn => _currentUser != null;
 
   Future<List<LinkItem>> getLinks() async {
