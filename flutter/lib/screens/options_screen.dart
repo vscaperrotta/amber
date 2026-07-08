@@ -84,16 +84,19 @@ class _OptionsScreenState extends State<OptionsScreen> {
   }
 
   Widget _card({required List<Widget> children}) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: VoidColors.darkBgSurface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: VoidColors.darkBorder, width: 1),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: children,
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          color: VoidColors.darkBgSurface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: VoidColors.darkBorder, width: 1),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: children,
+        ),
       ),
     );
   }

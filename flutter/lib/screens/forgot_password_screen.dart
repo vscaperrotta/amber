@@ -33,7 +33,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     });
 
     try {
-      await FirebaseAuth.instance.sendPasswordResetEmail(
+      final auth = FirebaseAuth.instance;
+      await auth.sendPasswordResetEmail(
         email: _emailController.text.trim(),
       );
       setState(() {
@@ -46,6 +47,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         _isLoading = false;
       });
     } catch (e) {
+      debugPrint('[ForgotPassword] sendPasswordResetEmail error: $e');
       setState(() {
         _errorMessage = t('auth.errorUnexpected');
         _isLoading = false;
@@ -59,6 +61,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         return t('auth.errorUserNotFound');
       case 'invalid-email':
         return t('auth.errorInvalidEmail');
+      case 'too-many-requests':
+        return 'Too many requests. Try again later.';
+      case 'internal-error':
+        return 'Firebase error. Check your internet connection.';
       default:
         return t('auth.errorGeneric', {'code': code});
     }
