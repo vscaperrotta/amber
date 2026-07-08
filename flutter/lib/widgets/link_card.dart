@@ -59,7 +59,9 @@ class LinkCard extends StatelessWidget {
         uri,
         mode: LaunchMode.externalApplication,
       );
-      if (!launched && context.mounted) {
+      if (launched && !link.isRead) {
+        onReadToggle?.call();
+      } else if (!launched && context.mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(t('linkCard.cannotOpen'))));

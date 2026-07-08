@@ -69,6 +69,12 @@ const Map<String, Map<String, String>> _translations = {
     'auth.passwordTooShort': 'Minimum 6 characters',
     'auth.noAccount': "Don't have an account? Register",
     'auth.hasAccount': 'Already have an account? Sign in',
+    'auth.forgotPassword': 'Forgot password?',
+    'auth.resetPassword': 'Reset Password',
+    'auth.resetPasswordMessage': 'Enter your email to receive a password reset link',
+    'auth.sendResetLink': 'Send reset link',
+    'auth.resetSent': 'Check your email for a password reset link',
+    'auth.backToSignIn': 'Back to sign in',
 
     // Auth Errors
     'auth.errorEmailInUse': 'Email already in use.',
@@ -216,6 +222,12 @@ const Map<String, Map<String, String>> _translations = {
     'auth.passwordTooShort': 'Minimo 6 caratteri',
     'auth.noAccount': 'Non hai un account? Registrati',
     'auth.hasAccount': 'Hai già un account? Accedi',
+    'auth.forgotPassword': 'Password dimenticata?',
+    'auth.resetPassword': 'Reimposta Password',
+    'auth.resetPasswordMessage': 'Inserisci la tua email per ricevere un link per reimpostare la password',
+    'auth.sendResetLink': 'Invia link',
+    'auth.resetSent': 'Controlla la tua email per il link di reimpostazione della password',
+    'auth.backToSignIn': 'Torna all\'accesso',
 
     // Auth Errors
     'auth.errorEmailInUse': 'Email già in uso.',

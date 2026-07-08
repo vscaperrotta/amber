@@ -54,7 +54,7 @@ class _MainScaffoldState extends State<MainScaffold> {
 
     final fab = Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
+        shape: BoxShape.circle,
         boxShadow: const [
           BoxShadow(
             color: Color(0x80F5A623), // amber glow, 50% opacity
@@ -69,6 +69,7 @@ class _MainScaffoldState extends State<MainScaffold> {
         backgroundColor: VoidColors.darkAccent,
         foregroundColor: VoidColors.accentOnPrimary,
         elevation: 0,
+        shape: const CircleBorder(),
         child: const Icon(Icons.add),
       ),
     );
