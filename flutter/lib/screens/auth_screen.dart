@@ -62,12 +62,6 @@ class _AuthScreenState extends State<AuthScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 32),
-              Icon(
-                Icons.account_circle,
-                size: 80,
-                color: context.colors.accent,
-              ),
-              const SizedBox(height: 12),
               Text(
                 'Amber',
                 textAlign: TextAlign.center,
