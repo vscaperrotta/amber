@@ -6,6 +6,7 @@ import '../providers/collection_provider.dart';
 import '../services/metadata_service.dart';
 import '../theme/app_colors.dart';
 import '../utils/i18n.dart';
+import '../widgets/loading_spinner.dart';
 
 class AddLinkScreen extends StatefulWidget {
   final String? initialUrl;
@@ -221,14 +222,7 @@ class _AddLinkScreenState extends State<AddLinkScreen> {
                   suffixIcon: _isFetchingTitle
                       ? Padding(
                           padding: const EdgeInsets.all(12),
-                          child: SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: context.colors.accent,
-                            ),
-                          ),
+                          child: LoadingSpinner(color: context.colors.accent),
                         )
                       : null,
                 ),
@@ -299,16 +293,7 @@ class _AddLinkScreenState extends State<AddLinkScreen> {
               const SizedBox(height: 24),
               FilledButton.icon(
                 onPressed: _isSaving ? null : _save,
-                icon: _isSaving
-                    ? SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: context.colors.accentOnPrimary,
-                        ),
-                      )
-                    : const Icon(Icons.save),
+                icon: _isSaving ? const LoadingSpinner() : const Icon(Icons.save),
                 label: Text(_isSaving ? t('common.saving') : t('common.save')),
               ),
             ],

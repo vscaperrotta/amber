@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_colors.dart';
 import '../utils/i18n.dart';
+import '../widgets/loading_spinner.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -141,16 +142,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           const SizedBox(height: 24),
           FilledButton(
             onPressed: _isLoading ? null : _sendResetEmail,
-            child: _isLoading
-                ? SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: c.accentOnPrimary,
-                    ),
-                  )
-                : Text(t('auth.sendResetLink')),
+            child: _isLoading ? const LoadingSpinner() : Text(t('auth.sendResetLink')),
           ),
         ],
       ),

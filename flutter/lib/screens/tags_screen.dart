@@ -8,7 +8,10 @@ import '../providers/ui_state_provider.dart';
 import '../models/link_item.dart';
 import '../theme/app_colors.dart';
 import '../utils/i18n.dart';
+import '../utils/dialogs.dart';
 import '../widgets/link_card.dart';
+import '../widgets/empty_state_view.dart';
+import '../widgets/collection_scoped_app_bar.dart';
 
 class TagsScreen extends StatefulWidget {
   const TagsScreen({super.key});
@@ -51,25 +54,10 @@ class _TagsScreenState extends State<TagsScreen> {
         },
         onDelete: () async {
           Navigator.pop(ctx);
-          final confirmed = await showDialog<bool>(
-            context: context,
-            builder: (dlgCtx) => AlertDialog(
-              title: Text(t('tags.deleteTag')),
-              content: Text('#$tag'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(dlgCtx, false),
-                  child: Text(t('common.cancel')),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.pop(dlgCtx, true),
-                  child: Text(
-                    t('common.delete'),
-                    style: TextStyle(color: dlgCtx.colors.statusError),
-                  ),
-                ),
-              ],
-            ),
+          final confirmed = await confirmDelete(
+            context,
+            title: t('tags.deleteTag'),
+            message: '#$tag',
           );
           if (confirmed == true) await provider.deleteTag(tag);
         },
@@ -210,22 +198,11 @@ class _TagsScreenState extends State<TagsScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          activeCollectionId != null
-              ? (collectionProvider.activeCollection?.name ?? t('tags.title'))
-              : t('tags.title'),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.w700),
-        ),
-        centerTitle: true,
-        actions: [
-          if (activeCollectionId != null)
-            IconButton(
-              icon: const Icon(Icons.close),
-              tooltip: t('collections.clearFilter'),
-              onPressed: () => collectionProvider.setActiveCollection(null),
-            ),
-          // Select mode toggle
+      appBar: CollectionScopedAppBar(
+        defaultTitle: t('tags.title'),
+        activeCollectionName: collectionProvider.activeCollection?.name,
+        onClearFilter: () => collectionProvider.setActiveCollection(null),
+        extraActions: [
           TextButton(
             onPressed: () {
               final newMode = !_selectMode;
@@ -384,30 +361,11 @@ class _TagsScreenState extends State<TagsScreen> {
                       context.read<LinkProvider>().toggleFavorite(linkItem.id),
                   onReadToggle: () =>
                       context.read<LinkProvider>().toggleRead(linkItem.id),
-                  onDismissConfirm: () async {
-                    return await showDialog<bool>(
-                      context: context,
-                      builder: (ctx) => AlertDialog(
-                        title: Text(t('dialog.deleteTitle')),
-                        content: Text(t('dialog.deleteMessage')),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(ctx, false),
-                            child: Text(t('common.cancel')),
-                          ),
-                          TextButton(
-                            onPressed: () => Navigator.pop(ctx, true),
-                            child: Text(
-                              t('common.delete'),
-                              style: TextStyle(
-                                color: ctx.colors.statusError,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+                  onDismissConfirm: () => confirmDelete(
+                    context,
+                    title: t('dialog.deleteTitle'),
+                    message: t('dialog.deleteMessage'),
+                  ),
                   onDismissed: () =>
                       context.read<LinkProvider>().deleteLink(linkItem.id),
                 );
@@ -426,51 +384,19 @@ class _TagsScreenState extends State<TagsScreen> {
     String? collectionName,
     VoidCallback? onClearFilter,
   }) {
-    final c = context.colors;
     return Scaffold(
       appBar: isFiltered
-          ? AppBar(
-              title: Text(
-                collectionName ?? t('tags.title'),
-                style: GoogleFonts.outfit(fontWeight: FontWeight.w700),
-              ),
-              centerTitle: true,
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  tooltip: t('collections.clearFilter'),
-                  onPressed: onClearFilter,
-                ),
-              ],
+          ? CollectionScopedAppBar(
+              defaultTitle: t('tags.title'),
+              activeCollectionName: collectionName,
+              onClearFilter: onClearFilter ?? () {},
             )
           : null,
       body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.label_off_outlined,
-              size: 64,
-              color: c.textTertiary,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              isFiltered ? t('collections.emptyTitle') : t('tags.emptyTitle'),
-              style: GoogleFonts.outfit(
-                fontSize: 18,
-                color: c.textTertiary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              isFiltered ? t('collections.emptySubtitle') : t('tags.emptySubtitle'),
-              textAlign: TextAlign.center,
-              style: GoogleFonts.outfit(
-                fontSize: 14,
-                color: c.textTertiary,
-              ),
-            ),
-          ],
+        child: EmptyStateView(
+          icon: Icons.label_off_outlined,
+          title: isFiltered ? t('collections.emptyTitle') : t('tags.emptyTitle'),
+          subtitle: isFiltered ? t('collections.emptySubtitle') : t('tags.emptySubtitle'),
         ),
       ),
     );

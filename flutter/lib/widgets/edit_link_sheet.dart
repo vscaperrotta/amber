@@ -6,6 +6,7 @@ import '../providers/link_provider.dart';
 import '../providers/collection_provider.dart';
 import '../theme/app_colors.dart';
 import '../utils/i18n.dart';
+import 'loading_spinner.dart';
 
 /// Bottom sheet to edit a link's title, tags and collection.
 class EditLinkSheet extends StatefulWidget {
@@ -128,16 +129,7 @@ class _EditLinkSheetState extends State<EditLinkSheet> {
           const SizedBox(height: 24),
           FilledButton.icon(
             onPressed: _isSaving ? null : _save,
-            icon: _isSaving
-                ? SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: c.accentOnPrimary,
-                    ),
-                  )
-                : const Icon(Icons.save),
+            icon: _isSaving ? const LoadingSpinner() : const Icon(Icons.save),
             label: Text(_isSaving ? t('common.saving') : t('editLink.save')),
           ),
         ],

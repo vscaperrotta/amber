@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart' as app;
 import '../theme/app_colors.dart';
 import '../utils/i18n.dart';
+import '../widgets/loading_spinner.dart';
 import 'forgot_password_screen.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -151,14 +152,7 @@ class _AuthScreenState extends State<AuthScreen> {
               FilledButton(
                 onPressed: authProvider.isLoading ? null : _submit,
                 child: authProvider.isLoading
-                    ? SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: context.colors.accentOnPrimary,
-                        ),
-                      )
+                    ? const LoadingSpinner()
                     : Text(_isLogin ? t('auth.signIn') : t('auth.signUp')),
               ),
               const SizedBox(height: 16),

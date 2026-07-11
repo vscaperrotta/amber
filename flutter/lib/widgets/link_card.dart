@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../models/link_item.dart';
 import '../theme/app_colors.dart';
 import '../utils/i18n.dart';
+import 'action_sheet.dart';
 import 'edit_link_sheet.dart';
 
 class LinkCard extends StatelessWidget {
@@ -114,154 +115,22 @@ class LinkCard extends StatelessWidget {
 
   void _showActionMenu(BuildContext context) {
     final c = context.colors;
-    final overlay = Overlay.of(context);
-    OverlayEntry? entry;
-    const panelWidth = 168.0;
-    const panelHeight = 96.0;
-    const margin = 8.0;
-
-    final renderBox = context.findRenderObject() as RenderBox?;
-    final screenSize = MediaQuery.of(context).size;
-    final padding = MediaQuery.of(context).padding;
-
-    double x, y;
-    if (renderBox != null && renderBox.hasSize) {
-      final pos = renderBox.localToGlobal(Offset.zero);
-      final size = renderBox.size;
-      x = pos.dx + (size.width - panelWidth) / 2;
-      y = pos.dy + size.height + margin;
-      if (x < padding.left + margin) {
-        x = padding.left + margin;
-      } else if (x + panelWidth >
-          screenSize.width - padding.right - margin) {
-        x = screenSize.width - padding.right - margin - panelWidth;
-      }
-      if (y + panelHeight >
-          screenSize.height - padding.bottom - margin) {
-        y = pos.dy - panelHeight - margin;
-      }
-    } else {
-      x = (screenSize.width - panelWidth) / 2;
-      y = (screenSize.height - panelHeight) / 2;
-    }
-
-    entry = OverlayEntry(
-      builder: (ctx) {
-        final mediaQuery = MediaQuery.of(ctx);
-        return Stack(
-          children: [
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => entry?.remove(),
-              child: SizedBox(
-                width: mediaQuery.size.width,
-                height: mediaQuery.size.height,
-              ),
-            ),
-            Positioned(
-              left: x,
-              top: y,
-              child: Material(
-                color: Colors.transparent,
-                child: Container(
-                  width: panelWidth,
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: c.bgSurface,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: c.border),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x66000000),
-                        blurRadius: 12,
-                        offset: Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      InkWell(
-                        onTap: () {
-                          entry?.remove();
-                          _openEditSheet(context);
-                        },
-                        borderRadius: BorderRadius.circular(8),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 10,
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.edit,
-                                size: 20,
-                                color: c.accent,
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  t('linkCard.editTooltip'),
-                                  style: GoogleFonts.outfit(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: c.textPrimary,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Divider(
-                        height: 1,
-                        thickness: 1,
-                        color: c.border,
-                      ),
-                      InkWell(
-                        onTap: () {
-                          entry?.remove();
-                          _confirmAndDelete(context);
-                        },
-                        borderRadius: BorderRadius.circular(8),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 10,
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.delete,
-                                size: 20,
-                                color: c.statusError,
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  t('common.delete'),
-                                  style: GoogleFonts.outfit(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: c.statusError,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
+    showActionSheet(
+      context,
+      items: [
+        ActionSheetItem(
+          icon: Icons.edit,
+          label: t('linkCard.editTooltip'),
+          onTap: () => _openEditSheet(context),
+        ),
+        ActionSheetItem(
+          icon: Icons.delete,
+          label: t('common.delete'),
+          color: c.statusError,
+          onTap: () => _confirmAndDelete(context),
+        ),
+      ],
     );
-    overlay.insert(entry);
   }
 
   @override

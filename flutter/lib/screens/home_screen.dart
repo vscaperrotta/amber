@@ -6,40 +6,14 @@ import '../providers/link_provider.dart';
 import '../providers/collection_provider.dart';
 import '../theme/app_colors.dart';
 import '../utils/i18n.dart';
+import '../utils/time_bucket.dart';
+import '../utils/dialogs.dart';
 import '../widgets/link_card.dart';
-
-// ── Time bucket helpers ────────────────────────────────────────────────────────
-
-enum _TimeBucket { today, yesterday, thisWeek, thisMonth, earlier }
-
-_TimeBucket _bucketFor(DateTime date) {
-  final now = DateTime.now();
-  final today = DateTime(now.year, now.month, now.day);
-  final d = DateTime(date.year, date.month, date.day);
-  final diff = today.difference(d).inDays;
-  if (diff == 0) return _TimeBucket.today;
-  if (diff == 1) return _TimeBucket.yesterday;
-  if (diff <= 7) return _TimeBucket.thisWeek;
-  if (diff <= 30) return _TimeBucket.thisMonth;
-  return _TimeBucket.earlier;
-}
-
-String _bucketLabel(_TimeBucket bucket) {
-  switch (bucket) {
-    case _TimeBucket.today:
-      return t('home.groupToday');
-    case _TimeBucket.yesterday:
-      return t('home.groupYesterday');
-    case _TimeBucket.thisWeek:
-      return t('home.groupThisWeek');
-    case _TimeBucket.thisMonth:
-      return t('home.groupThisMonth');
-    case _TimeBucket.earlier:
-      return t('home.groupEarlier');
-  }
-}
-
-// ── HomeScreen ─────────────────────────────────────────────────────────────────
+import '../widgets/action_sheet.dart';
+import '../widgets/group_header.dart';
+import '../widgets/pill_filter_chip.dart';
+import '../widgets/empty_state_view.dart';
+import '../widgets/collection_scoped_app_bar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -52,20 +26,14 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _showUnreadOnly = false;
 
   List<Widget> _buildGroupedList(BuildContext context, List<LinkItem> links) {
-    final grouped = <_TimeBucket, List<LinkItem>>{};
-    for (final link in links) {
-      final b = _bucketFor(link.createdAt);
-      grouped.putIfAbsent(b, () => []).add(link);
-    }
-
-    final order = _TimeBucket.values;
+    final grouped = groupByTimeBucket(links);
     final items = <Widget>[];
 
-    for (final bucket in order) {
+    for (final bucket in TimeBucket.values) {
       final bucketLinks = grouped[bucket];
       if (bucketLinks == null || bucketLinks.isEmpty) continue;
 
-      items.add(_GroupHeader(label: _bucketLabel(bucket)));
+      items.add(GroupHeader(label: bucketLabel(bucket)));
 
       for (final link in bucketLinks) {
         items.add(LinkCard(
@@ -73,25 +41,10 @@ class _HomeScreenState extends State<HomeScreen> {
           link: link,
           onFavoriteToggle: () =>
               context.read<LinkProvider>().toggleFavorite(link.id),
-          onDismissConfirm: () => showDialog<bool>(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: Text(t('dialog.deleteTitle')),
-              content: Text(t('dialog.deleteMessage')),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context, false),
-                  child: Text(t('common.cancel')),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.pop(context, true),
-                  child: Text(
-                    t('common.delete'),
-                    style: TextStyle(color: context.colors.statusError),
-                  ),
-                ),
-              ],
-            ),
+          onDismissConfirm: () => confirmDelete(
+            context,
+            title: t('dialog.deleteTitle'),
+            message: t('dialog.deleteMessage'),
           ),
           onDismissed: () => context.read<LinkProvider>().deleteLink(link.id),
           onReadToggle: () => context.read<LinkProvider>().toggleRead(link.id),
@@ -141,34 +94,21 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _showCollectionOptions(BuildContext context, collection) {
-    showModalBottomSheet(
-      context: context,
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.drive_file_rename_outline),
-              title: Text(t('collections.rename')),
-              onTap: () {
-                Navigator.pop(ctx);
-                _showRenameDialog(context, collection);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.delete_outline, color: ctx.colors.statusError),
-              title: Text(
-                t('common.delete'),
-                style: TextStyle(color: ctx.colors.statusError),
-              ),
-              onTap: () {
-                Navigator.pop(ctx);
-                _showDeleteConfirm(context, collection);
-              },
-            ),
-          ],
+    showActionSheet(
+      context,
+      items: [
+        ActionSheetItem(
+          icon: Icons.drive_file_rename_outline,
+          label: t('collections.rename'),
+          onTap: () => _showRenameDialog(context, collection),
         ),
-      ),
+        ActionSheetItem(
+          icon: Icons.delete_outline,
+          label: t('common.delete'),
+          color: context.colors.statusError,
+          onTap: () => _showDeleteConfirm(context, collection),
+        ),
+      ],
     );
   }
 
@@ -210,30 +150,15 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _showDeleteConfirm(BuildContext context, collection) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(t('collections.deleteConfirm')),
-        content: Text(t('collections.deleteMessage')),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(t('common.cancel')),
-          ),
-          TextButton(
-            onPressed: () {
-              context.read<CollectionProvider>().deleteCollection(collection.id);
-              Navigator.pop(ctx);
-            },
-            child: Text(
-              t('common.delete'),
-              style: TextStyle(color: ctx.colors.statusError),
-            ),
-          ),
-        ],
-      ),
+  Future<void> _showDeleteConfirm(BuildContext context, collection) async {
+    final confirmed = await confirmDelete(
+      context,
+      title: t('collections.deleteConfirm'),
+      message: t('collections.deleteMessage'),
     );
+    if (confirmed == true && context.mounted) {
+      context.read<CollectionProvider>().deleteCollection(collection.id);
+    }
   }
 
   @override
@@ -254,23 +179,10 @@ class _HomeScreenState extends State<HomeScreen> {
         : allLinks;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          activeCollectionId != null
-              ? (collectionProvider.activeCollection?.name ?? t('home.title'))
-              : t('home.title'),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.w700),
-        ),
-        centerTitle: true,
-        actions: activeCollectionId != null
-            ? [
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  tooltip: t('collections.clearFilter'),
-                  onPressed: () => collectionProvider.setActiveCollection(null),
-                ),
-              ]
-            : null,
+      appBar: CollectionScopedAppBar(
+        defaultTitle: t('home.title'),
+        activeCollectionName: collectionProvider.activeCollection?.name,
+        onClearFilter: () => collectionProvider.setActiveCollection(null),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -313,13 +225,13 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
             child: Row(
               children: [
-                _FilterChip(
+                PillFilterChip(
                   label: t('home.filterAll'),
                   selected: !_showUnreadOnly,
                   onTap: () => setState(() => _showUnreadOnly = false),
                 ),
                 const SizedBox(width: 8),
-                _FilterChip(
+                PillFilterChip(
                   label: t('home.filterUnread'),
                   selected: _showUnreadOnly,
                   onTap: () => setState(() => _showUnreadOnly = true),
@@ -345,38 +257,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildEmptyState(bool isFiltered) {
-    final c = context.colors;
     return ListView(
       children: [
         const SizedBox(height: 200),
         Center(
-          child: Column(
-            children: [
-              Icon(
-                isFiltered ? Icons.folder_open : Icons.link_off,
-                size: 64,
-                color: c.textTertiary,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                isFiltered ? t('collections.emptyTitle') : t('home.emptyTitle'),
-                style: GoogleFonts.outfit(
-                  fontSize: 18,
-                  color: c.textTertiary,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                isFiltered
-                    ? t('collections.emptySubtitle')
-                    : t('home.emptySubtitle'),
-                textAlign: TextAlign.center,
-                style: GoogleFonts.outfit(
-                  fontSize: 14,
-                  color: c.textTertiary,
-                ),
-              ),
-            ],
+          child: EmptyStateView(
+            icon: isFiltered ? Icons.folder_open : Icons.link_off,
+            title: isFiltered ? t('collections.emptyTitle') : t('home.emptyTitle'),
+            subtitle: isFiltered ? t('collections.emptySubtitle') : t('home.emptySubtitle'),
           ),
         ),
       ],
@@ -394,6 +282,8 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 // ── Collection chip ────────────────────────────────────────────────────────────
+// Unique to Home: carries a per-collection color dot, unlike the plain
+// icon+label chips reused elsewhere — kept local rather than shared.
 
 class _CollectionChip extends StatelessWidget {
   final String label;
@@ -517,71 +407,6 @@ class _AddCollectionChip extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-// ── Filter chip ────────────────────────────────────────────────────────────────
-
-class _FilterChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _FilterChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-        decoration: BoxDecoration(
-          color: selected ? c.accentMuted : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: selected ? c.accent : c.border,
-          ),
-        ),
-        child: Text(
-          label,
-          style: GoogleFonts.outfit(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: selected ? c.accent : c.textSecondary,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ── Group header ───────────────────────────────────────────────────────────────
-
-class _GroupHeader extends StatelessWidget {
-  final String label;
-
-  const _GroupHeader({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-      child: Text(
-        label.toUpperCase(),
-        style: GoogleFonts.outfit(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: context.colors.textTertiary,
-          letterSpacing: 0.6,
         ),
       ),
     );
