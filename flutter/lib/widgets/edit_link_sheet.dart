@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../models/link_item.dart';
 import '../providers/link_provider.dart';
 import '../providers/collection_provider.dart';
-import '../theme/void_colors.dart';
+import '../theme/app_colors.dart';
 import '../utils/i18n.dart';
 
 /// Bottom sheet to edit a link's title, tags and collection.
@@ -63,6 +63,7 @@ class _EditLinkSheetState extends State<EditLinkSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
     final collections = context.watch<CollectionProvider>().collections;
 
     return Padding(
@@ -81,7 +82,7 @@ class _EditLinkSheetState extends State<EditLinkSheet> {
             style: GoogleFonts.outfit(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: VoidColors.darkTextPrimary,
+              color: c.textPrimary,
             ),
           ),
           const SizedBox(height: 16),
@@ -128,12 +129,12 @@ class _EditLinkSheetState extends State<EditLinkSheet> {
           FilledButton.icon(
             onPressed: _isSaving ? null : _save,
             icon: _isSaving
-                ? const SizedBox(
+                ? SizedBox(
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: VoidColors.accentOnPrimary,
+                      color: c.accentOnPrimary,
                     ),
                   )
                 : const Icon(Icons.save),

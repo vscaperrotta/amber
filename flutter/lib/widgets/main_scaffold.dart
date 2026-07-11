@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart' as app;
 import '../providers/link_provider.dart';
 import '../providers/collection_provider.dart';
 import '../providers/ui_state_provider.dart';
-import '../theme/void_colors.dart';
+import '../theme/app_colors.dart';
 import '../utils/i18n.dart';
 import '../screens/home_screen.dart';
 import '../screens/favorites_screen.dart';
@@ -20,6 +21,7 @@ class MainScaffold extends StatefulWidget {
 
 class _MainScaffoldState extends State<MainScaffold> {
   int _selectedIndex = 0;
+  bool? _lastIsLoggedIn;
 
   static const List<Widget> _screens = [
     HomeScreen(),
@@ -30,12 +32,14 @@ class _MainScaffoldState extends State<MainScaffold> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await Future.wait([
-        context.read<LinkProvider>().loadLinks(),
-        context.read<CollectionProvider>().loadCollections(),
-      ]);
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _reloadData());
+  }
+
+  Future<void> _reloadData() async {
+    await Future.wait([
+      context.read<LinkProvider>().loadLinks(),
+      context.read<CollectionProvider>().loadCollections(),
+    ]);
   }
 
   Future<void> _openAddLink() async {
@@ -50,7 +54,14 @@ class _MainScaffoldState extends State<MainScaffold> {
 
   @override
   Widget build(BuildContext context) {
+    final isLoggedIn = context.watch<app.AuthProvider>().isLoggedIn;
+    if (_lastIsLoggedIn != null && _lastIsLoggedIn != isLoggedIn) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _reloadData());
+    }
+    _lastIsLoggedIn = isLoggedIn;
+
     final selectMode = context.watch<UiStateProvider>().selectModeActive;
+    final c = context.colors;
 
     final fab = Container(
       decoration: BoxDecoration(
@@ -66,8 +77,8 @@ class _MainScaffoldState extends State<MainScaffold> {
       child: FloatingActionButton(
         onPressed: _openAddLink,
         tooltip: t('nav.addLink'),
-        backgroundColor: VoidColors.darkAccent,
-        foregroundColor: VoidColors.accentOnPrimary,
+        backgroundColor: c.accent,
+        foregroundColor: c.accentOnPrimary,
         elevation: 0,
         shape: const CircleBorder(),
         child: const Icon(Icons.add),
@@ -87,7 +98,7 @@ class _MainScaffoldState extends State<MainScaffold> {
         child: selectMode
             ? const SizedBox(width: double.infinity, height: 0)
             : BottomAppBar(
-            color: VoidColors.darkBgElevated,
+            color: c.bgElevated,
             elevation: 0,
             shape: const CircularNotchedRectangle(),
             notchMargin: 8.0,
@@ -153,9 +164,10 @@ class _NavItem extends StatelessWidget {
   Widget build(BuildContext context) {
     // Icon: amber when active, tertiary when inactive.
     // Label: always text-primary — never amber.
-    const activeIconColor = VoidColors.darkAccent;
-    const inactiveIconColor = VoidColors.darkTextTertiary;
-    const labelColor = VoidColors.darkTextPrimary;
+    final c = context.colors;
+    final activeIconColor = c.accent;
+    final inactiveIconColor = c.textTertiary;
+    final labelColor = c.textPrimary;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
@@ -171,7 +183,7 @@ class _NavItem extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 11,
                 color: labelColor,
               ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/link_item.dart';
 import '../providers/link_provider.dart';
-import '../theme/void_colors.dart';
+import '../theme/app_colors.dart';
 import '../utils/i18n.dart';
 import '../widgets/link_card.dart';
 
@@ -22,23 +22,24 @@ class TagFilteredScreen extends StatelessWidget {
         centerTitle: true,
       ),
       body: links.isEmpty
-          ? _buildEmptyState()
+          ? _buildEmptyState(context)
           : _buildLinkList(context, links),
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
+    final c = context.colors;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.link_off, size: 64, color: VoidColors.darkTextTertiary),
+          Icon(Icons.link_off, size: 64, color: c.textTertiary),
           const SizedBox(height: 16),
           Text(
             t('tagFiltered.empty'),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
-              color: VoidColors.darkTextTertiary,
+              color: c.textTertiary,
             ),
           ),
         ],
@@ -70,7 +71,7 @@ class TagFilteredScreen extends StatelessWidget {
                   onPressed: () => Navigator.pop(context, true),
                   child: Text(
                     t('common.delete'),
-                    style: const TextStyle(color: VoidColors.darkStatusError),
+                    style: TextStyle(color: context.colors.statusError),
                   ),
                 ),
               ],

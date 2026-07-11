@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart' as app;
-import '../theme/void_colors.dart';
+import '../theme/app_colors.dart';
 import '../utils/i18n.dart';
 import 'forgot_password_screen.dart';
 
@@ -62,10 +62,10 @@ class _AuthScreenState extends State<AuthScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 32),
-              const Icon(
+              Icon(
                 Icons.account_circle,
                 size: 80,
-                color: VoidColors.darkAccent,
+                color: context.colors.accent,
               ),
               const SizedBox(height: 12),
               Text(
@@ -74,7 +74,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 style: GoogleFonts.outfit(
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
-                  color: VoidColors.darkTextPrimary,
+                  color: context.colors.textPrimary,
                   letterSpacing: -0.3,
                 ),
               ),
@@ -157,12 +157,12 @@ class _AuthScreenState extends State<AuthScreen> {
               FilledButton(
                 onPressed: authProvider.isLoading ? null : _submit,
                 child: authProvider.isLoading
-                    ? const SizedBox(
+                    ? SizedBox(
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: VoidColors.accentOnPrimary,
+                          color: context.colors.accentOnPrimary,
                         ),
                       )
                     : Text(_isLogin ? t('auth.signIn') : t('auth.signUp')),

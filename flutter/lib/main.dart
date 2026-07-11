@@ -10,6 +10,7 @@ import 'providers/collection_provider.dart';
 import 'providers/ui_state_provider.dart';
 import 'screens/add_link_screen.dart';
 import 'theme/void_colors.dart';
+import 'theme/app_colors.dart';
 import 'widgets/main_scaffold.dart';
 
 void main() async {
@@ -225,6 +226,7 @@ class _AmberAppState extends State<AmberApp> {
           progressIndicatorTheme: const ProgressIndicatorThemeData(
             color: VoidColors.lightAccent,
           ),
+          extensions: const [AppColors.light],
         ),
         // ── Dark theme ─────────────────────────────────────────────────────────
         darkTheme: ThemeData(
@@ -359,6 +361,7 @@ class _AmberAppState extends State<AmberApp> {
           progressIndicatorTheme: const ProgressIndicatorThemeData(
             color: VoidColors.darkAccent,
           ),
+          extensions: const [AppColors.dark],
         ),
         themeMode: ThemeMode.system,
         home: const MainScaffold(),

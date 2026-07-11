@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../providers/auth_provider.dart' as app;
 import '../providers/link_provider.dart';
-import '../theme/void_colors.dart';
+import '../theme/app_colors.dart';
 import '../utils/i18n.dart';
 import 'auth_screen.dart';
 
@@ -76,7 +76,7 @@ class _OptionsScreenState extends State<OptionsScreen> {
         style: GoogleFonts.outfit(
           fontSize: 11,
           fontWeight: FontWeight.w700,
-          color: VoidColors.darkTextTertiary,
+          color: context.colors.textTertiary,
           letterSpacing: 1.0,
         ),
       ),
@@ -84,14 +84,15 @@ class _OptionsScreenState extends State<OptionsScreen> {
   }
 
   Widget _card({required List<Widget> children}) {
+    final c = context.colors;
     return Material(
       color: Colors.transparent,
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
-          color: VoidColors.darkBgSurface,
+          color: c.bgSurface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: VoidColors.darkBorder, width: 1),
+          border: Border.all(color: c.border, width: 1),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -105,6 +106,7 @@ class _OptionsScreenState extends State<OptionsScreen> {
 
   Widget _buildAccountSection(
       app.AuthProvider authProvider, LinkProvider linkProvider) {
+    final c = context.colors;
     if (authProvider.isLoggedIn) {
       return _card(
         children: [
@@ -114,7 +116,7 @@ class _OptionsScreenState extends State<OptionsScreen> {
               t('options.signedInAs'),
               style: GoogleFonts.outfit(
                 fontSize: 12,
-                color: VoidColors.darkTextTertiary,
+                color: c.textTertiary,
               ),
             ),
           ),
@@ -125,21 +127,21 @@ class _OptionsScreenState extends State<OptionsScreen> {
               style: GoogleFonts.outfit(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
-                color: VoidColors.darkTextPrimary,
+                color: c.textPrimary,
               ),
             ),
           ),
-          const Divider(height: 1, color: VoidColors.darkBorder),
+          Divider(height: 1, color: c.border),
           ListTile(
             dense: true,
-            leading: const Icon(
+            leading: Icon(
               Icons.logout,
               size: 18,
-              color: VoidColors.darkStatusError,
+              color: c.statusError,
             ),
             title: Text(
               t('options.signOut'),
-              style: GoogleFonts.outfit(color: VoidColors.darkStatusError),
+              style: GoogleFonts.outfit(color: c.statusError),
             ),
             onTap: () async {
               await authProvider.signOut();
@@ -154,18 +156,18 @@ class _OptionsScreenState extends State<OptionsScreen> {
       children: [
         ListTile(
           dense: true,
-          leading: const Icon(
+          leading: Icon(
             Icons.person_outline,
             size: 18,
-            color: VoidColors.darkTextSecondary,
+            color: c.textSecondary,
           ),
           title: Text(
             t('options.signIn'),
-            style: GoogleFonts.outfit(color: VoidColors.darkTextPrimary),
+            style: GoogleFonts.outfit(color: c.textPrimary),
           ),
-          trailing: const Icon(
+          trailing: Icon(
             Icons.chevron_right,
-            color: VoidColors.darkTextTertiary,
+            color: c.textTertiary,
           ),
           onTap: () async {
             final result = await Navigator.push<bool>(
@@ -184,6 +186,7 @@ class _OptionsScreenState extends State<OptionsScreen> {
   // ── Collection section ────────────────────────────────────────────────────
 
   Widget _buildCollectionSection(LinkProvider linkProvider) {
+    final c = context.colors;
     final total = linkProvider.links.length;
     final favs = linkProvider.favoriteLinks.length;
 
@@ -199,17 +202,17 @@ class _OptionsScreenState extends State<OptionsScreen> {
             ],
           ),
         ),
-        const Divider(height: 1, color: VoidColors.darkBorder),
+        Divider(height: 1, color: c.border),
         ListTile(
           dense: true,
-          leading: const Icon(
+          leading: Icon(
             Icons.download_outlined,
             size: 18,
-            color: VoidColors.darkTextSecondary,
+            color: c.textSecondary,
           ),
           title: Text(
             t('options.exportJson'),
-            style: GoogleFonts.outfit(color: VoidColors.darkTextPrimary),
+            style: GoogleFonts.outfit(color: c.textPrimary),
           ),
           onTap: _exportJson,
         ),
@@ -251,12 +254,13 @@ class _StatChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: VoidColors.darkBgElevated,
+        color: c.bgElevated,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: VoidColors.darkBorder),
+        border: Border.all(color: c.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -267,14 +271,14 @@ class _StatChip extends StatelessWidget {
             style: GoogleFonts.outfit(
               fontSize: 20,
               fontWeight: FontWeight.w700,
-              color: VoidColors.darkAccent,
+              color: c.accent,
             ),
           ),
           Text(
             label,
             style: GoogleFonts.outfit(
               fontSize: 11,
-              color: VoidColors.darkTextTertiary,
+              color: c.textTertiary,
             ),
           ),
         ],
@@ -282,4 +286,3 @@ class _StatChip extends StatelessWidget {
     );
   }
 }
-

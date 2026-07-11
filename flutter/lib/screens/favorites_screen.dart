@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../models/link_item.dart';
 import '../providers/link_provider.dart';
-import '../theme/void_colors.dart';
+import '../theme/app_colors.dart';
 import '../utils/i18n.dart';
 import '../widgets/link_card.dart';
 
@@ -85,7 +85,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   onPressed: () => Navigator.pop(context, true),
                   child: Text(
                     t('common.delete'),
-                    style: const TextStyle(color: VoidColors.darkStatusError),
+                    style: TextStyle(color: context.colors.statusError),
                   ),
                 ),
               ],
@@ -144,9 +144,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             child: RefreshIndicator(
               onRefresh: () => linkProvider.loadLinks(),
               child: linkProvider.isLoading
-                  ? const Center(
+                  ? Center(
                       child: CircularProgressIndicator(
-                          color: VoidColors.darkAccent))
+                          color: context.colors.accent))
                   : filtered.isEmpty
                       ? _buildEmptyState()
                       : _buildGroupedList(context, filtered),
@@ -158,23 +158,24 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   }
 
   Widget _buildEmptyState() {
+    final c = context.colors;
     return ListView(
       children: [
         const SizedBox(height: 200),
         Center(
           child: Column(
             children: [
-              const Icon(
+              Icon(
                 Icons.star_border,
                 size: 64,
-                color: VoidColors.darkTextTertiary,
+                color: c.textTertiary,
               ),
               const SizedBox(height: 16),
               Text(
                 t('favorites.emptyTitle'),
                 style: GoogleFonts.outfit(
                   fontSize: 18,
-                  color: VoidColors.darkTextTertiary,
+                  color: c.textTertiary,
                 ),
               ),
               const SizedBox(height: 8),
@@ -183,7 +184,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 textAlign: TextAlign.center,
                 style: GoogleFonts.outfit(
                   fontSize: 14,
-                  color: VoidColors.darkTextTertiary,
+                  color: c.textTertiary,
                 ),
               ),
             ],
@@ -218,16 +219,17 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
         decoration: BoxDecoration(
-          color: selected ? VoidColors.darkAccentMuted : Colors.transparent,
+          color: selected ? c.accentMuted : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: selected ? VoidColors.darkAccent : VoidColors.darkBorder,
+            color: selected ? c.accent : c.border,
           ),
         ),
         child: Text(
@@ -235,9 +237,7 @@ class _FilterChip extends StatelessWidget {
           style: GoogleFonts.outfit(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: selected
-                ? VoidColors.darkAccent
-                : VoidColors.darkTextSecondary,
+            color: selected ? c.accent : c.textSecondary,
           ),
         ),
       ),
@@ -261,7 +261,7 @@ class _GroupHeader extends StatelessWidget {
         style: GoogleFonts.outfit(
           fontSize: 12,
           fontWeight: FontWeight.w600,
-          color: VoidColors.darkTextTertiary,
+          color: context.colors.textTertiary,
           letterSpacing: 0.6,
         ),
       ),

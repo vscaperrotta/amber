@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import '../providers/link_provider.dart';
 import '../providers/ui_state_provider.dart';
 import '../models/link_item.dart';
-import '../theme/void_colors.dart';
+import '../theme/app_colors.dart';
 import '../utils/i18n.dart';
 import '../widgets/link_card.dart';
 
@@ -36,7 +36,7 @@ class _TagsScreenState extends State<TagsScreen> {
   void _showTagActionsSheet(BuildContext context, String tag, LinkProvider provider) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: VoidColors.darkBgElevated,
+      backgroundColor: context.colors.bgElevated,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
@@ -64,7 +64,7 @@ class _TagsScreenState extends State<TagsScreen> {
                   onPressed: () => Navigator.pop(dlgCtx, true),
                   child: Text(
                     t('common.delete'),
-                    style: const TextStyle(color: VoidColors.darkStatusError),
+                    style: TextStyle(color: dlgCtx.colors.statusError),
                   ),
                 ),
               ],
@@ -83,11 +83,12 @@ class _TagsScreenState extends State<TagsScreen> {
   // ── Bulk-select bottom bar ────────────────────────────────────────────────
 
   Widget _buildBulkBar(LinkProvider provider) {
+    final c = context.colors;
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-      decoration: const BoxDecoration(
-        color: VoidColors.darkBgElevated,
-        border: Border(top: BorderSide(color: VoidColors.darkBorder)),
+      decoration: BoxDecoration(
+        color: c.bgElevated,
+        border: Border(top: BorderSide(color: c.border)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -98,7 +99,7 @@ class _TagsScreenState extends State<TagsScreen> {
             t('tags.selectedCount', {'n': '${_selectedLinkIds.length}'}),
             style: GoogleFonts.outfit(
               fontSize: 13,
-              color: VoidColors.darkTextTertiary,
+              color: c.textTertiary,
             ),
           ),
           const SizedBox(height: 8),
@@ -134,8 +135,8 @@ class _TagsScreenState extends State<TagsScreen> {
                           });
                         },
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: VoidColors.darkAccent,
-                    side: const BorderSide(color: VoidColors.darkAccent),
+                    foregroundColor: c.accent,
+                    side: BorderSide(color: c.accent),
                   ),
                   child: Text(t('tags.addTagToSelected')),
                 ),
@@ -159,8 +160,8 @@ class _TagsScreenState extends State<TagsScreen> {
                           });
                         },
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: VoidColors.darkStatusError,
-                    side: const BorderSide(color: VoidColors.darkStatusError),
+                    foregroundColor: c.statusError,
+                    side: BorderSide(color: c.statusError),
                   ),
                   child: Text(t('tags.removeTagFromSelected')),
                 ),
@@ -174,6 +175,7 @@ class _TagsScreenState extends State<TagsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
     final linkProvider = context.watch<LinkProvider>();
     final allTags = linkProvider.allTags;
     final links = linkProvider.links;
@@ -219,9 +221,7 @@ class _TagsScreenState extends State<TagsScreen> {
               style: GoogleFonts.outfit(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: _selectMode
-                    ? VoidColors.darkAccent
-                    : VoidColors.darkTextSecondary,
+                color: _selectMode ? c.accent : c.textSecondary,
               ),
             ),
           ),
@@ -246,15 +246,13 @@ class _TagsScreenState extends State<TagsScreen> {
                     avatar: Icon(
                       isAll ? Icons.check : Icons.label_outline,
                       size: 14,
-                      color: isAll
-                          ? VoidColors.darkAccent
-                          : VoidColors.darkTextTertiary,
+                      color: isAll ? c.accent : c.textTertiary,
                     ),
                     label: Text(
                       t('tags.all'),
                       style: GoogleFonts.outfit(
                         fontSize: 12,
-                        color: VoidColors.darkTextSecondary,
+                        color: c.textSecondary,
                       ),
                     ),
                     selected: isAll,
@@ -263,10 +261,8 @@ class _TagsScreenState extends State<TagsScreen> {
                         _selectedTags.clear();
                       });
                     },
-                    selectedColor: VoidColors.darkAccentMuted,
-                    side: isAll
-                        ? const BorderSide(color: VoidColors.darkAccent)
-                        : const BorderSide(color: VoidColors.darkBorder),
+                    selectedColor: c.accentMuted,
+                    side: BorderSide(color: isAll ? c.accent : c.border),
                     padding: const EdgeInsets.symmetric(horizontal: 4),
                   );
                 }
@@ -282,15 +278,13 @@ class _TagsScreenState extends State<TagsScreen> {
                     avatar: Icon(
                       isSelected ? Icons.check : Icons.label_outline,
                       size: 14,
-                      color: isSelected
-                          ? VoidColors.darkAccent
-                          : VoidColors.darkTextTertiary,
+                      color: isSelected ? c.accent : c.textTertiary,
                     ),
                     label: Text(
                       '$tag (${tagGroups[tag]!.length})',
                       style: GoogleFonts.outfit(
                         fontSize: 12,
-                        color: VoidColors.darkTextSecondary,
+                        color: c.textSecondary,
                       ),
                     ),
                     selected: isSelected,
@@ -303,10 +297,8 @@ class _TagsScreenState extends State<TagsScreen> {
                         }
                       });
                     },
-                    selectedColor: VoidColors.darkAccentMuted,
-                    side: isSelected
-                        ? const BorderSide(color: VoidColors.darkAccent)
-                        : const BorderSide(color: VoidColors.darkBorder),
+                    selectedColor: c.accentMuted,
+                    side: BorderSide(color: isSelected ? c.accent : c.border),
                     padding: const EdgeInsets.symmetric(horizontal: 4),
                   ),
                 );
@@ -334,7 +326,7 @@ class _TagsScreenState extends State<TagsScreen> {
                           style: GoogleFonts.outfit(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
-                            color: VoidColors.darkAccent,
+                            color: c.accent,
                             letterSpacing: 0.5,
                           ),
                         ),
@@ -343,7 +335,7 @@ class _TagsScreenState extends State<TagsScreen> {
                           '${item.count}',
                           style: GoogleFonts.outfit(
                             fontSize: 12,
-                            color: VoidColors.darkTextTertiary,
+                            color: c.textTertiary,
                           ),
                         ),
                       ],
@@ -387,8 +379,8 @@ class _TagsScreenState extends State<TagsScreen> {
                             onPressed: () => Navigator.pop(ctx, true),
                             child: Text(
                               t('common.delete'),
-                              style: const TextStyle(
-                                color: VoidColors.darkStatusError,
+                              style: TextStyle(
+                                color: ctx.colors.statusError,
                               ),
                             ),
                           ),
@@ -410,22 +402,23 @@ class _TagsScreenState extends State<TagsScreen> {
   }
 
   Widget _buildEmptyState() {
+    final c = context.colors;
     return Scaffold(
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+            Icon(
               Icons.label_off_outlined,
               size: 64,
-              color: VoidColors.darkTextTertiary,
+              color: c.textTertiary,
             ),
             const SizedBox(height: 16),
             Text(
               t('tags.emptyTitle'),
               style: GoogleFonts.outfit(
                 fontSize: 18,
-                color: VoidColors.darkTextTertiary,
+                color: c.textTertiary,
               ),
             ),
             const SizedBox(height: 8),
@@ -434,7 +427,7 @@ class _TagsScreenState extends State<TagsScreen> {
               textAlign: TextAlign.center,
               style: GoogleFonts.outfit(
                 fontSize: 14,
-                color: VoidColors.darkTextTertiary,
+                color: c.textTertiary,
               ),
             ),
           ],
@@ -484,6 +477,7 @@ class _TagActionsSheetState extends State<_TagActionsSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
     final otherTags =
         widget.allTags.where((t) => t != widget.tag).toList();
 
@@ -503,7 +497,7 @@ class _TagActionsSheetState extends State<_TagActionsSheet> {
                 width: 36,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: VoidColors.darkBorder,
+                  color: c.border,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -515,11 +509,11 @@ class _TagActionsSheetState extends State<_TagActionsSheet> {
                 style: GoogleFonts.outfit(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: VoidColors.darkAccent,
+                  color: c.accent,
                 ),
               ),
             ),
-            const Divider(height: 1, color: VoidColors.darkBorder),
+            Divider(height: 1, color: c.border),
             // ── Rename ───────────────────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
@@ -528,7 +522,7 @@ class _TagActionsSheetState extends State<_TagActionsSheet> {
                 style: GoogleFonts.outfit(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: VoidColors.darkTextTertiary,
+                  color: c.textTertiary,
                   letterSpacing: 0.4,
                 ),
               ),
@@ -550,8 +544,8 @@ class _TagActionsSheetState extends State<_TagActionsSheet> {
                   const SizedBox(width: 8),
                   FilledButton(
                     style: FilledButton.styleFrom(
-                      backgroundColor: VoidColors.darkAccent,
-                      foregroundColor: VoidColors.accentOnPrimary,
+                      backgroundColor: c.accent,
+                      foregroundColor: c.accentOnPrimary,
                       minimumSize: const Size(72, 40),
                     ),
                     onPressed: () =>
@@ -570,7 +564,7 @@ class _TagActionsSheetState extends State<_TagActionsSheet> {
                   style: GoogleFonts.outfit(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: VoidColors.darkTextTertiary,
+                    color: c.textTertiary,
                     letterSpacing: 0.4,
                   ),
                 ),
@@ -588,8 +582,8 @@ class _TagActionsSheetState extends State<_TagActionsSheet> {
                     const SizedBox(width: 8),
                     FilledButton(
                       style: FilledButton.styleFrom(
-                        backgroundColor: VoidColors.darkBgElevated,
-                        foregroundColor: VoidColors.darkTextPrimary,
+                        backgroundColor: c.bgElevated,
+                        foregroundColor: c.textPrimary,
                         minimumSize: const Size(72, 40),
                       ),
                       onPressed: () {
@@ -604,17 +598,16 @@ class _TagActionsSheetState extends State<_TagActionsSheet> {
             ],
             // ── Delete ───────────────────────────────────────────────────────
             const SizedBox(height: 8),
-            const Divider(height: 1, color: VoidColors.darkBorder),
+            Divider(height: 1, color: c.border),
             ListTile(
-              leading: const Icon(
+              leading: Icon(
                 Icons.delete_outline,
-                color: VoidColors.darkStatusError,
+                color: c.statusError,
                 size: 18,
               ),
               title: Text(
                 t('tags.deleteTag'),
-                style:
-                    GoogleFonts.outfit(color: VoidColors.darkStatusError),
+                style: GoogleFonts.outfit(color: c.statusError),
               ),
               onTap: widget.onDelete,
             ),
@@ -642,17 +635,18 @@ class _MergeDropdownState extends State<_MergeDropdown> {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
     return DropdownButtonFormField<String>(
       initialValue: _selected,
       hint: Text(
         t('tags.mergeHint'),
         style: GoogleFonts.outfit(
           fontSize: 13,
-          color: VoidColors.darkTextTertiary,
+          color: c.textTertiary,
         ),
       ),
       decoration: const InputDecoration(isDense: true),
-      dropdownColor: VoidColors.darkBgElevated,
+      dropdownColor: c.bgElevated,
       items: widget.tags
           .map(
             (tag) => DropdownMenuItem(
@@ -661,7 +655,7 @@ class _MergeDropdownState extends State<_MergeDropdown> {
                 tag,
                 style: GoogleFonts.outfit(
                   fontSize: 13,
-                  color: VoidColors.darkTextPrimary,
+                  color: c.textPrimary,
                 ),
               ),
             ),

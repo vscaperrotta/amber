@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/link_provider.dart';
 import '../providers/collection_provider.dart';
 import '../services/metadata_service.dart';
-import '../theme/void_colors.dart';
+import '../theme/app_colors.dart';
 import '../utils/i18n.dart';
 
 class AddLinkScreen extends StatefulWidget {
@@ -219,14 +219,14 @@ class _AddLinkScreenState extends State<AddLinkScreen> {
                   prefixIcon: const Icon(Icons.title),
                   border: const OutlineInputBorder(),
                   suffixIcon: _isFetchingTitle
-                      ? const Padding(
-                          padding: EdgeInsets.all(12),
+                      ? Padding(
+                          padding: const EdgeInsets.all(12),
                           child: SizedBox(
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: VoidColors.darkAccent,
+                              color: context.colors.accent,
                             ),
                           ),
                         )
@@ -300,12 +300,12 @@ class _AddLinkScreenState extends State<AddLinkScreen> {
               FilledButton.icon(
                 onPressed: _isSaving ? null : _save,
                 icon: _isSaving
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: VoidColors.accentOnPrimary,
+                          color: context.colors.accentOnPrimary,
                         ),
                       )
                     : const Icon(Icons.save),

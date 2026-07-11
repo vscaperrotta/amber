@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../theme/void_colors.dart';
+import '../theme/app_colors.dart';
 import '../utils/i18n.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
@@ -86,6 +86,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   }
 
   Widget _buildForm() {
+    final c = context.colors;
     return Form(
       key: _formKey,
       child: Column(
@@ -95,7 +96,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           Icon(
             Icons.lock_reset,
             size: 80,
-            color: VoidColors.darkAccent,
+            color: c.accent,
           ),
           const SizedBox(height: 24),
           Text(
@@ -103,7 +104,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             textAlign: TextAlign.center,
             style: GoogleFonts.outfit(
               fontSize: 14,
-              color: VoidColors.darkTextSecondary,
+              color: c.textSecondary,
             ),
           ),
           const SizedBox(height: 32),
@@ -141,12 +142,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           FilledButton(
             onPressed: _isLoading ? null : _sendResetEmail,
             child: _isLoading
-                ? const SizedBox(
+                ? SizedBox(
                     height: 20,
                     width: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: VoidColors.accentOnPrimary,
+                      color: c.accentOnPrimary,
                     ),
                   )
                 : Text(t('auth.sendResetLink')),
@@ -157,6 +158,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   }
 
   Widget _buildSuccessScreen() {
+    final c = context.colors;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -164,7 +166,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         Icon(
           Icons.mark_email_read_outlined,
           size: 80,
-          color: VoidColors.darkAccent,
+          color: c.accent,
         ),
         const SizedBox(height: 24),
         Text(
@@ -173,7 +175,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           style: GoogleFonts.outfit(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: VoidColors.darkTextPrimary,
+            color: c.textPrimary,
           ),
         ),
         const SizedBox(height: 8),
@@ -182,7 +184,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           textAlign: TextAlign.center,
           style: GoogleFonts.outfit(
             fontSize: 14,
-            color: VoidColors.darkTextSecondary,
+            color: c.textSecondary,
           ),
         ),
         const SizedBox(height: 48),

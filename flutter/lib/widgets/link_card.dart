@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/link_item.dart';
-import '../theme/void_colors.dart';
+import '../theme/app_colors.dart';
 import '../utils/i18n.dart';
 import 'edit_link_sheet.dart';
 
@@ -95,10 +95,11 @@ class LinkCard extends StatelessWidget {
   }
 
   void _openEditSheet(BuildContext context) {
+    final c = context.colors;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: VoidColors.darkBgSurface,
+      backgroundColor: c.bgSurface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -112,6 +113,7 @@ class LinkCard extends StatelessWidget {
   }
 
   void _showActionMenu(BuildContext context) {
+    final c = context.colors;
     final overlay = Overlay.of(context);
     OverlayEntry? entry;
     const panelWidth = 168.0;
@@ -165,9 +167,9 @@ class LinkCard extends StatelessWidget {
                   width: panelWidth,
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: VoidColors.darkBgSurface,
+                    color: c.bgSurface,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: VoidColors.darkBorder),
+                    border: Border.all(color: c.border),
                     boxShadow: const [
                       BoxShadow(
                         color: Color(0x66000000),
@@ -192,10 +194,10 @@ class LinkCard extends StatelessWidget {
                           ),
                           child: Row(
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.edit,
                                 size: 20,
-                                color: VoidColors.darkAccent,
+                                color: c.accent,
                               ),
                               const SizedBox(width: 12),
                               Expanded(
@@ -204,7 +206,7 @@ class LinkCard extends StatelessWidget {
                                   style: GoogleFonts.outfit(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
-                                    color: VoidColors.darkTextPrimary,
+                                    color: c.textPrimary,
                                   ),
                                 ),
                               ),
@@ -215,7 +217,7 @@ class LinkCard extends StatelessWidget {
                       Divider(
                         height: 1,
                         thickness: 1,
-                        color: VoidColors.darkBorder,
+                        color: c.border,
                       ),
                       InkWell(
                         onTap: () {
@@ -230,10 +232,10 @@ class LinkCard extends StatelessWidget {
                           ),
                           child: Row(
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.delete,
                                 size: 20,
-                                color: VoidColors.darkStatusError,
+                                color: c.statusError,
                               ),
                               const SizedBox(width: 12),
                               Expanded(
@@ -242,7 +244,7 @@ class LinkCard extends StatelessWidget {
                                   style: GoogleFonts.outfit(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
-                                    color: VoidColors.darkStatusError,
+                                    color: c.statusError,
                                   ),
                                 ),
                               ),
@@ -264,17 +266,17 @@ class LinkCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
+
     // In selectable mode, wrap with a simple checkable tile — no swipe-to-delete
     if (selectable) {
       return Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 3),
         decoration: BoxDecoration(
-          color: selected
-              ? VoidColors.darkAccentMuted
-              : VoidColors.darkBgSurface,
+          color: selected ? c.accentMuted : c.bgSurface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: selected ? VoidColors.darkAccent : VoidColors.darkBorder,
+            color: selected ? c.accent : c.border,
           ),
         ),
         child: InkWell(
@@ -287,9 +289,9 @@ class LinkCard extends StatelessWidget {
                 Checkbox(
                   value: selected,
                   onChanged: (v) => onSelectChanged?.call(v ?? false),
-                  activeColor: VoidColors.darkAccent,
-                  checkColor: VoidColors.accentOnPrimary,
-                  side: const BorderSide(color: VoidColors.darkBorder),
+                  activeColor: c.accent,
+                  checkColor: c.accentOnPrimary,
+                  side: BorderSide(color: c.border),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
@@ -300,7 +302,7 @@ class LinkCard extends StatelessWidget {
                     style: GoogleFonts.outfit(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: VoidColors.darkTextPrimary,
+                      color: c.textPrimary,
                       height: 1.35,
                     ),
                   ),
@@ -317,10 +319,10 @@ class LinkCard extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 3),
         decoration: BoxDecoration(
-          color: VoidColors.darkBgSurface,
+          color: c.bgSurface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: link.isRead ? VoidColors.darkBorder : VoidColors.darkAccent,
+            color: link.isRead ? c.border : c.accent,
             width: link.isRead ? 1.0 : 1.5,
           ),
         ),
@@ -344,9 +346,9 @@ class LinkCard extends StatelessWidget {
                         imageUrl: link.thumbnail!,
                         fit: BoxFit.cover,
                         errorWidget: (_, __, ___) =>
-                            Container(color: VoidColors.darkBgElevated),
+                            Container(color: c.bgElevated),
                         placeholder: (_, __) =>
-                            Container(color: VoidColors.darkBgElevated),
+                            Container(color: c.bgElevated),
                       ),
                     ),
                   ),
@@ -377,8 +379,8 @@ class LinkCard extends StatelessWidget {
                                 child: Container(
                                   width: 6,
                                   height: 6,
-                                  decoration: const BoxDecoration(
-                                    color: VoidColors.darkAccent,
+                                  decoration: BoxDecoration(
+                                    color: c.accent,
                                     shape: BoxShape.circle,
                                   ),
                                 ),
@@ -391,7 +393,7 @@ class LinkCard extends StatelessWidget {
                                 style: GoogleFonts.outfit(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
-                                  color: VoidColors.darkTextPrimary,
+                                  color: c.textPrimary,
                                   height: 1.35,
                                 ),
                               ),
@@ -409,8 +411,8 @@ class LinkCard extends StatelessWidget {
                                       : Icons.star_border,
                                   size: 28,
                                   color: link.isFavorite
-                                      ? VoidColors.darkAccent
-                                      : VoidColors.darkTextTertiary,
+                                      ? c.accent
+                                      : c.textTertiary,
                                 ),
                               ),
                             ),
@@ -424,7 +426,7 @@ class LinkCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.outfit(
                             fontSize: 11,
-                            color: VoidColors.darkTextTertiary,
+                            color: c.textTertiary,
                           ),
                         ),
                         // Tags
@@ -449,7 +451,7 @@ class LinkCard extends StatelessWidget {
                                 _formatDate(link.createdAt),
                                 style: GoogleFonts.outfit(
                                   fontSize: 10,
-                                  color: VoidColors.darkTextTertiary,
+                                  color: c.textTertiary,
                                 ),
                               ),
                             ),
@@ -466,8 +468,8 @@ class LinkCard extends StatelessWidget {
                                         : Icons.visibility_off_outlined,
                                     size: 28,
                                     color: link.isRead
-                                        ? VoidColors.darkTextTertiary
-                                        : VoidColors.darkAccent,
+                                        ? c.textTertiary
+                                        : c.accent,
                                   ),
                                 ),
                               ),
