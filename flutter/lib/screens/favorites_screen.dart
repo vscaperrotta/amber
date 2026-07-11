@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../models/link_item.dart';
 import '../providers/link_provider.dart';
+import '../providers/collection_provider.dart';
 import '../theme/app_colors.dart';
 import '../utils/i18n.dart';
 import '../widgets/link_card.dart';
@@ -104,7 +105,13 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   @override
   Widget build(BuildContext context) {
     final linkProvider = context.watch<LinkProvider>();
-    final favorites = linkProvider.favoriteLinks;
+    final collectionProvider = context.watch<CollectionProvider>();
+    final activeCollectionId = collectionProvider.activeCollectionId;
+
+    var favorites = linkProvider.favoriteLinks;
+    if (activeCollectionId != null) {
+      favorites = favorites.where((l) => l.collectionId == activeCollectionId).toList();
+    }
     final filtered = _showUnreadOnly
         ? favorites.where((l) => !l.isRead).toList()
         : favorites;
@@ -112,10 +119,21 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          t('favorites.title'),
+          activeCollectionId != null
+              ? (collectionProvider.activeCollection?.name ?? t('favorites.title'))
+              : t('favorites.title'),
           style: GoogleFonts.outfit(fontWeight: FontWeight.w700),
         ),
         centerTitle: true,
+        actions: activeCollectionId != null
+            ? [
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  tooltip: t('collections.clearFilter'),
+                  onPressed: () => collectionProvider.setActiveCollection(null),
+                ),
+              ]
+            : null,
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -148,7 +166,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                       child: CircularProgressIndicator(
                           color: context.colors.accent))
                   : filtered.isEmpty
-                      ? _buildEmptyState()
+                      ? _buildEmptyState(activeCollectionId != null)
                       : _buildGroupedList(context, filtered),
             ),
           ),
@@ -157,7 +175,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(bool isFiltered) {
     final c = context.colors;
     return ListView(
       children: [
@@ -172,7 +190,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                t('favorites.emptyTitle'),
+                isFiltered ? t('collections.emptyTitle') : t('favorites.emptyTitle'),
                 style: GoogleFonts.outfit(
                   fontSize: 18,
                   color: c.textTertiary,
@@ -180,7 +198,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                t('favorites.emptySubtitle'),
+                isFiltered ? t('collections.emptySubtitle') : t('favorites.emptySubtitle'),
                 textAlign: TextAlign.center,
                 style: GoogleFonts.outfit(
                   fontSize: 14,

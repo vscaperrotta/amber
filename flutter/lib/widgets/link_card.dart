@@ -370,21 +370,6 @@ class LinkCard extends StatelessWidget {
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            if (!link.isRead)
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                  top: 5,
-                                  right: 6,
-                                ),
-                                child: Container(
-                                  width: 6,
-                                  height: 6,
-                                  decoration: BoxDecoration(
-                                    color: c.accent,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                              ),
                             Expanded(
                               child: Text(
                                 link.title,

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../providers/link_provider.dart';
+import '../providers/collection_provider.dart';
 import '../providers/ui_state_provider.dart';
 import '../models/link_item.dart';
 import '../theme/app_colors.dart';
@@ -177,14 +178,25 @@ class _TagsScreenState extends State<TagsScreen> {
   Widget build(BuildContext context) {
     final c = context.colors;
     final linkProvider = context.watch<LinkProvider>();
-    final allTags = linkProvider.allTags;
-    final links = linkProvider.links;
+    final collectionProvider = context.watch<CollectionProvider>();
+    final activeCollectionId = collectionProvider.activeCollectionId;
 
-    if (allTags.isEmpty) return _buildEmptyState();
+    final scopedLinks = activeCollectionId == null
+        ? linkProvider.links
+        : linkProvider.links.where((l) => l.collectionId == activeCollectionId).toList();
+    final allTags = ({for (final l in scopedLinks) ...l.tags}).toList()..sort();
+
+    if (allTags.isEmpty) {
+      return _buildEmptyState(
+        isFiltered: activeCollectionId != null,
+        collectionName: collectionProvider.activeCollection?.name,
+        onClearFilter: () => collectionProvider.setActiveCollection(null),
+      );
+    }
 
     final tagGroups = {
       for (final tag in allTags)
-        tag: links.where((l) => l.tags.contains(tag)).toList(),
+        tag: scopedLinks.where((l) => l.tags.contains(tag)).toList(),
     };
 
     final tagsToShow =
@@ -200,11 +212,19 @@ class _TagsScreenState extends State<TagsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          t('tags.title'),
+          activeCollectionId != null
+              ? (collectionProvider.activeCollection?.name ?? t('tags.title'))
+              : t('tags.title'),
           style: GoogleFonts.outfit(fontWeight: FontWeight.w700),
         ),
         centerTitle: true,
         actions: [
+          if (activeCollectionId != null)
+            IconButton(
+              icon: const Icon(Icons.close),
+              tooltip: t('collections.clearFilter'),
+              onPressed: () => collectionProvider.setActiveCollection(null),
+            ),
           // Select mode toggle
           TextButton(
             onPressed: () {
@@ -401,9 +421,29 @@ class _TagsScreenState extends State<TagsScreen> {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState({
+    bool isFiltered = false,
+    String? collectionName,
+    VoidCallback? onClearFilter,
+  }) {
     final c = context.colors;
     return Scaffold(
+      appBar: isFiltered
+          ? AppBar(
+              title: Text(
+                collectionName ?? t('tags.title'),
+                style: GoogleFonts.outfit(fontWeight: FontWeight.w700),
+              ),
+              centerTitle: true,
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  tooltip: t('collections.clearFilter'),
+                  onPressed: onClearFilter,
+                ),
+              ],
+            )
+          : null,
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -415,7 +455,7 @@ class _TagsScreenState extends State<TagsScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              t('tags.emptyTitle'),
+              isFiltered ? t('collections.emptyTitle') : t('tags.emptyTitle'),
               style: GoogleFonts.outfit(
                 fontSize: 18,
                 color: c.textTertiary,
@@ -423,7 +463,7 @@ class _TagsScreenState extends State<TagsScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              t('tags.emptySubtitle'),
+              isFiltered ? t('collections.emptySubtitle') : t('tags.emptySubtitle'),
               textAlign: TextAlign.center,
               style: GoogleFonts.outfit(
                 fontSize: 14,
