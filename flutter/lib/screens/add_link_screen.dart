@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../theme/app_fonts.dart';
 import 'package:provider/provider.dart';
 import '../providers/link_provider.dart';
 import '../providers/collection_provider.dart';
@@ -7,6 +7,7 @@ import '../services/metadata_service.dart';
 import '../theme/app_colors.dart';
 import '../utils/i18n.dart';
 import '../widgets/loading_spinner.dart';
+import '../theme/cool_icons.dart';
 
 class AddLinkScreen extends StatefulWidget {
   final String? initialUrl;
@@ -180,7 +181,7 @@ class _AddLinkScreenState extends State<AddLinkScreen> {
       appBar: AppBar(
         title: Text(
           t('addLink.title'),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.w700),
+          style: AppFonts.body(fontWeight: FontWeight.w700),
         ),
       ),
       body: Padding(
@@ -196,7 +197,7 @@ class _AddLinkScreenState extends State<AddLinkScreen> {
                 decoration: InputDecoration(
                   labelText: t('addLink.urlLabel'),
                   hintText: t('addLink.urlHint'),
-                  prefixIcon: const Icon(Icons.link),
+                  prefixIcon: const Icon(CoolIcons.link),
                   border: const OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.url,
@@ -217,7 +218,7 @@ class _AddLinkScreenState extends State<AddLinkScreen> {
                 decoration: InputDecoration(
                   labelText: t('addLink.titleLabel'),
                   hintText: t('addLink.titleHint'),
-                  prefixIcon: const Icon(Icons.title),
+                  prefixIcon: const Icon(CoolIcons.title),
                   border: const OutlineInputBorder(),
                   suffixIcon: _isFetchingTitle
                       ? Padding(
@@ -235,7 +236,7 @@ class _AddLinkScreenState extends State<AddLinkScreen> {
                 decoration: InputDecoration(
                   labelText: t('addLink.tagsLabel'),
                   hintText: t('addLink.tagsHint'),
-                  prefixIcon: const Icon(Icons.label_outline),
+                  prefixIcon: const Icon(CoolIcons.tagOutline),
                   border: const OutlineInputBorder(),
                 ),
                 textCapitalization: TextCapitalization.characters,
@@ -256,7 +257,7 @@ class _AddLinkScreenState extends State<AddLinkScreen> {
                         final tag = _tagSuggestions[index];
                         return ListTile(
                           dense: true,
-                          leading: const Icon(Icons.label_outline, size: 18),
+                          leading: const Icon(CoolIcons.tagOutline, size: 18),
                           title: Text(tag),
                           onTap: () => _selectSuggestion(tag),
                         );
@@ -273,7 +274,7 @@ class _AddLinkScreenState extends State<AddLinkScreen> {
                     value: _selectedCollectionId,
                     decoration: InputDecoration(
                       labelText: t('collections.fieldLabel'),
-                      prefixIcon: const Icon(Icons.folder_outlined),
+                      prefixIcon: const Icon(CoolIcons.folder),
                       border: const OutlineInputBorder(),
                     ),
                     items: [
@@ -293,7 +294,7 @@ class _AddLinkScreenState extends State<AddLinkScreen> {
               const SizedBox(height: 24),
               FilledButton.icon(
                 onPressed: _isSaving ? null : _save,
-                icon: _isSaving ? const LoadingSpinner() : const Icon(Icons.save),
+                icon: _isSaving ? const LoadingSpinner() : const Icon(CoolIcons.save),
                 label: Text(_isSaving ? t('common.saving') : t('common.save')),
               ),
             ],

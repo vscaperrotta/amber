@@ -98,14 +98,23 @@ const Map<String, Map<String, String>> _translations = {
     'options.title': 'Settings',
     'options.sectionAccount': 'Account',
     'options.sectionCollection': 'Collection',
+    'options.sectionStats': 'Statistics',
+    'options.sectionData': 'Data',
     'options.signedInAs': 'Signed in as',
     'options.signOut': 'Sign out',
     'options.signIn': 'Sign in / Register',
     'options.totalLinks': 'Total links',
     'options.favorites': 'Favorites',
+    'options.tags': 'Tags',
+    'options.folders': 'Folders',
     'options.exportJson': 'Export as JSON',
     'options.exportSuccess': '{n} links exported',
     'options.exportError': 'Export failed',
+    'options.clearLibrary': 'Clear library (demo)',
+    'options.clearLibraryTitle': 'Clear library?',
+    'options.clearLibraryMessage':
+        'Deletes every saved link. This cannot be undone.',
+    'options.footer': 'Amber · Void v2 · design concept',
     'options.save': 'Save',
     'options.saved': 'Saved',
 
@@ -151,6 +160,26 @@ const Map<String, Map<String, String>> _translations = {
     'collections.deleteMessage':
         'Links in this collection will not be deleted.',
     'collections.manage': 'Manage collections',
+
+    // Filter sheet
+    'filters.title': 'Filters',
+    'filters.folder': 'FOLDER',
+    'filters.allFolders': 'All',
+    'filters.status': 'STATUS',
+    'filters.tags': 'TAGS',
+    'filters.crossFolder': 'across all folders',
+    'filters.reset': 'Reset',
+    'filters.apply': 'Apply',
+
+    // Search
+    'home.searchHint': 'Search links…',
+    'favorites.searchHint': 'Search favorites…',
+    'search.title': 'Search',
+    'search.emptyTitle': 'No results',
+
+    // Tags cloud
+    'tags.subtitle':
+        'Every link, from every folder. Tap a tag to explore it — size = how often you use it.',
   },
   'it': {
     // Common
@@ -251,14 +280,23 @@ const Map<String, Map<String, String>> _translations = {
     'options.title': 'Impostazioni',
     'options.sectionAccount': 'Account',
     'options.sectionCollection': 'Collezione',
+    'options.sectionStats': 'Statistiche',
+    'options.sectionData': 'Dati',
     'options.signedInAs': 'Accesso come',
     'options.signOut': 'Esci',
     'options.signIn': 'Accedi / Registrati',
     'options.totalLinks': 'Link totali',
     'options.favorites': 'Preferiti',
+    'options.tags': 'Tag',
+    'options.folders': 'Cartelle',
     'options.exportJson': 'Esporta come JSON',
     'options.exportSuccess': '{n} link esportati',
     'options.exportError': 'Esportazione fallita',
+    'options.clearLibrary': 'Svuota libreria (demo)',
+    'options.clearLibraryTitle': 'Svuotare la libreria?',
+    'options.clearLibraryMessage':
+        'Elimina tutti i link salvati. Azione irreversibile.',
+    'options.footer': 'Amber · Void v2 · concept di design',
     'options.save': 'Salva',
     'options.saved': 'Salvato',
 
@@ -304,6 +342,26 @@ const Map<String, Map<String, String>> _translations = {
     'collections.deleteMessage':
         'I link in questa cartella non verranno eliminati.',
     'collections.manage': 'Gestisci cartelle',
+
+    // Filter sheet
+    'filters.title': 'Filtri',
+    'filters.folder': 'CARTELLA',
+    'filters.allFolders': 'Tutte',
+    'filters.status': 'STATO',
+    'filters.tags': 'TAG',
+    'filters.crossFolder': 'trasversali alle cartelle',
+    'filters.reset': 'Reimposta',
+    'filters.apply': 'Applica',
+
+    // Search
+    'home.searchHint': 'Cerca nei link…',
+    'favorites.searchHint': 'Cerca nei preferiti…',
+    'search.title': 'Cerca',
+    'search.emptyTitle': 'Nessun risultato',
+
+    // Tags cloud
+    'tags.subtitle':
+        'Tutti i link, di ogni cartella. Tocca un tag per esplorarlo — dimensione = quanto lo usi.',
   },
 };
 

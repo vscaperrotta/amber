@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../theme/app_fonts.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart' as app;
 import '../theme/app_colors.dart';
 import '../utils/i18n.dart';
 import '../widgets/loading_spinner.dart';
 import 'forgot_password_screen.dart';
+import '../theme/cool_icons.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -66,7 +67,7 @@ class _AuthScreenState extends State<AuthScreen> {
               Text(
                 'Amber',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.outfit(
+                style: AppFonts.body(
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
                   color: context.colors.textPrimary,
@@ -78,7 +79,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 controller: _emailController,
                 decoration: InputDecoration(
                   labelText: t('auth.email'),
-                  prefixIcon: const Icon(Icons.email_outlined),
+                  prefixIcon: const Icon(CoolIcons.email),
                   border: const OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.emailAddress,
@@ -98,13 +99,13 @@ class _AuthScreenState extends State<AuthScreen> {
                 controller: _passwordController,
                 decoration: InputDecoration(
                   labelText: t('auth.password'),
-                  prefixIcon: const Icon(Icons.lock_outlined),
+                  prefixIcon: const Icon(CoolIcons.lock),
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscurePassword
-                          ? Icons.visibility_off
-                          : Icons.visibility,
+                          ? CoolIcons.eyeOff
+                          : CoolIcons.eye,
                     ),
                     onPressed: () {
                       setState(() => _obscurePassword = !_obscurePassword);

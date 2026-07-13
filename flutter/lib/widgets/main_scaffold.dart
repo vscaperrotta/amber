@@ -11,6 +11,7 @@ import '../screens/favorites_screen.dart';
 import '../screens/tags_screen.dart';
 import '../screens/add_link_screen.dart';
 import '../screens/options_screen.dart';
+import '../theme/cool_icons.dart';
 
 class MainScaffold extends StatefulWidget {
   const MainScaffold({super.key});
@@ -81,7 +82,7 @@ class _MainScaffoldState extends State<MainScaffold> {
         foregroundColor: c.accentOnPrimary,
         elevation: 0,
         shape: const CircleBorder(),
-        child: const Icon(Icons.add),
+        child: const Icon(CoolIcons.add),
       ),
     );
 
@@ -106,30 +107,26 @@ class _MainScaffoldState extends State<MainScaffold> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _NavItem(
-                  icon: Icons.home_outlined,
-                  selectedIcon: Icons.home,
+                  icon: CoolIcons.homeOutline,
                   label: t('nav.home'),
                   selected: _selectedIndex == 0,
                   onTap: () => setState(() => _selectedIndex = 0),
                 ),
                 _NavItem(
-                  icon: Icons.star_border,
-                  selectedIcon: Icons.star,
+                  icon: CoolIcons.starOutline,
                   label: t('nav.favorites'),
                   selected: _selectedIndex == 1,
                   onTap: () => setState(() => _selectedIndex = 1),
                 ),
                 const SizedBox(width: 56), // spazio per il FAB
                 _NavItem(
-                  icon: Icons.label_outline,
-                  selectedIcon: Icons.label,
+                  icon: CoolIcons.tagOutline,
                   label: t('nav.tags'),
                   selected: _selectedIndex == 2,
                   onTap: () => setState(() => _selectedIndex = 2),
                 ),
                 _NavItem(
-                  icon: Icons.person_outline,
-                  selectedIcon: Icons.person,
+                  icon: CoolIcons.personOutline,
                   label: t('options.title'),
                   selected: false,
                   onTap: () => Navigator.push(
@@ -147,14 +144,12 @@ class _MainScaffoldState extends State<MainScaffold> {
 
 class _NavItem extends StatelessWidget {
   final IconData icon;
-  final IconData selectedIcon;
   final String label;
   final bool selected;
   final VoidCallback onTap;
 
   const _NavItem({
     required this.icon,
-    required this.selectedIcon,
     required this.label,
     required this.selected,
     required this.onTap,
@@ -162,7 +157,8 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Icon: amber when active, tertiary when inactive.
+    // Single icon; active state is signalled by color only (amber),
+    // never by swapping the glyph.
     // Label: always text-primary — never amber.
     final c = context.colors;
     final activeIconColor = c.accent;
@@ -177,7 +173,7 @@ class _NavItem extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              selected ? selectedIcon : icon,
+              icon,
               color: selected ? activeIconColor : inactiveIconColor,
             ),
             const SizedBox(height: 2),

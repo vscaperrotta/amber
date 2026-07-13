@@ -1,6 +1,6 @@
-# AGENTS.md
+# CLAUDE.md
 
-This file provides guidance to Agents when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Repository Structure
 
@@ -12,10 +12,10 @@ Monorepo for **Amber** — a cross-platform link-saving app (save/organize URLs,
 | `flutter/` | Mobile app | Flutter/Dart, Firebase, SQLite |
 | `obsidian/` | Obsidian plugin | TypeScript, esbuild, Firebase, SCSS |
 
-Each sub-project has its own `AGENTS.md` with full details:
-- [`browser/AGENTS.md`](browser/AGENTS.md)
-- [`flutter/AGENTS.md`](flutter/AGENTS.md)
-- [`obsidian/AGENTS.md`](obsidian/AGENTS.md)
+Each sub-project has its own `CLAUDE.md` with full details:
+- [`browser/CLAUDE.md`](browser/CLAUDE.md)
+- [`flutter/CLAUDE.md`](flutter/CLAUDE.md)
+- [`obsidian/CLAUDE.md`](obsidian/CLAUDE.md)
 
 ## Shared Concepts
 

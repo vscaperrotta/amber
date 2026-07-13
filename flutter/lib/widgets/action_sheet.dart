@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../theme/app_fonts.dart';
 import '../theme/app_colors.dart';
 
 /// A single row in an [showActionSheet] bottom sheet.
@@ -55,7 +55,7 @@ Future<void> showActionSheet(
                 alignment: Alignment.centerLeft,
                 child: Text(
                   title,
-                  style: GoogleFonts.outfit(
+                  style: AppFonts.body(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                     color: c.textTertiary,
@@ -69,7 +69,7 @@ Future<void> showActionSheet(
               leading: Icon(item.icon, size: 20, color: item.color ?? c.textPrimary),
               title: Text(
                 item.label,
-                style: GoogleFonts.outfit(
+                style: AppFonts.body(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: item.color ?? c.textPrimary,

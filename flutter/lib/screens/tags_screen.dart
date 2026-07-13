@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../theme/app_fonts.dart';
 import 'package:provider/provider.dart';
 import '../providers/link_provider.dart';
 import '../providers/collection_provider.dart';
@@ -9,33 +9,15 @@ import '../models/link_item.dart';
 import '../theme/app_colors.dart';
 import '../utils/i18n.dart';
 import '../utils/dialogs.dart';
+import '../utils/time_bucket.dart';
 import '../widgets/link_card.dart';
+import '../widgets/link_avatar.dart';
+import '../widgets/group_header.dart';
 import '../widgets/empty_state_view.dart';
-import '../widgets/collection_scoped_app_bar.dart';
+import '../theme/cool_icons.dart';
 
-class TagsScreen extends StatefulWidget {
+class TagsScreen extends StatelessWidget {
   const TagsScreen({super.key});
-
-  @override
-  State<TagsScreen> createState() => _TagsScreenState();
-}
-
-class _TagsScreenState extends State<TagsScreen> {
-  final Set<String> _selectedTags = {};
-
-  // Bulk-select mode
-  bool _selectMode = false;
-  final Set<String> _selectedLinkIds = {};
-  final TextEditingController _bulkTagController = TextEditingController();
-
-  @override
-  void dispose() {
-    context.read<UiStateProvider>().setSelectMode(false);
-    _bulkTagController.dispose();
-    super.dispose();
-  }
-
-  // ── Tag actions bottom sheet ─────────────────────────────────────────────
 
   void _showTagActionsSheet(BuildContext context, String tag, LinkProvider provider) {
     showModalBottomSheet(
@@ -69,7 +51,215 @@ class _TagsScreenState extends State<TagsScreen> {
     );
   }
 
-  // ── Bulk-select bottom bar ────────────────────────────────────────────────
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final linkProvider = context.watch<LinkProvider>();
+    final links = linkProvider.links;
+    final allTags = ({for (final l in links) ...l.tags}).toList()..sort();
+
+    if (allTags.isEmpty) {
+      return Scaffold(
+        body: Center(
+          child: EmptyStateView(
+            icon: CoolIcons.tagOff,
+            title: t('tags.emptyTitle'),
+            subtitle: t('tags.emptySubtitle'),
+          ),
+        ),
+      );
+    }
+
+    final counts = {
+      for (final tag in allTags)
+        tag: links.where((l) => l.tags.contains(tag)).length,
+    };
+    final maxCount = counts.values.reduce((a, b) => a > b ? a : b);
+
+    return Scaffold(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                t('tags.title'),
+                style: AppFonts.display(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w700,
+                  color: c.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                t('tags.subtitle'),
+                style: AppFonts.body(
+                  fontSize: 13,
+                  color: c.textTertiary,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  for (final tag in allTags)
+                    _TagBubble(
+                      tag: tag,
+                      count: counts[tag]!,
+                      maxCount: maxCount,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => TagDetailScreen(tag: tag),
+                        ),
+                      ),
+                      onLongPress: () {
+                        HapticFeedback.mediumImpact();
+                        _showTagActionsSheet(context, tag, linkProvider);
+                      },
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Tag bubble ─────────────────────────────────────────────────────────────
+// Size scales with usage count so heavily-used tags visually dominate the
+// cloud — the mapping is deliberately soft (sqrt) so one outlier tag
+// doesn't swallow the layout.
+
+class _TagBubble extends StatelessWidget {
+  final String tag;
+  final int count;
+  final int maxCount;
+  final VoidCallback onTap;
+  final VoidCallback onLongPress;
+
+  const _TagBubble({
+    required this.tag,
+    required this.count,
+    required this.maxCount,
+    required this.onTap,
+    required this.onLongPress,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = linkAccentColor(tag);
+    final scale = maxCount <= 1 ? 1.0 : (count / maxCount);
+    final t = scale.clamp(0.0, 1.0);
+    final fontSize = 13.0 + 9.0 * t;
+    final hPad = 14.0 + 8.0 * t;
+    final vPad = 8.0 + 6.0 * t;
+
+    return GestureDetector(
+      onTap: onTap,
+      onLongPress: onLongPress,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: hPad, vertical: vPad),
+        decoration: BoxDecoration(
+          color: color.withAlpha(38),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: color),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '#$tag',
+              style: AppFonts.body(
+                fontSize: fontSize,
+                fontWeight: FontWeight.w700,
+                color: color,
+              ),
+            ),
+            const SizedBox(width: 5),
+            Text(
+              '$count',
+              style: AppFonts.body(
+                fontSize: fontSize * 0.75,
+                fontWeight: FontWeight.w600,
+                color: color.withAlpha(200),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Tag detail screen ───────────────────────────────────────────────────────
+// Reached by tapping a bubble: every link carrying that tag, grouped by
+// time like Home. Keeps the bulk tag-editing flow that used to live on
+// the old chip-row Tags screen, now scoped to this one tag.
+
+class TagDetailScreen extends StatefulWidget {
+  final String tag;
+  const TagDetailScreen({super.key, required this.tag});
+
+  @override
+  State<TagDetailScreen> createState() => _TagDetailScreenState();
+}
+
+class _TagDetailScreenState extends State<TagDetailScreen> {
+  bool _selectMode = false;
+  final Set<String> _selectedLinkIds = {};
+  final _bulkTagController = TextEditingController();
+
+  @override
+  void dispose() {
+    context.read<UiStateProvider>().setSelectMode(false);
+    _bulkTagController.dispose();
+    super.dispose();
+  }
+
+  List<Widget> _buildGroupedItems(BuildContext context, List<LinkItem> links) {
+    final grouped = groupByTimeBucket(links);
+    final items = <Widget>[];
+    for (final bucket in TimeBucket.values) {
+      final bucketLinks = grouped[bucket];
+      if (bucketLinks == null || bucketLinks.isEmpty) continue;
+      items.add(GroupHeader(label: bucketLabel(bucket)));
+      for (final link in bucketLinks) {
+        items.add(LinkCard(
+          key: ValueKey(link.id),
+          link: link,
+          stripeColor:
+              context.read<CollectionProvider>().colorForCollectionId(link.collectionId),
+          selectable: _selectMode,
+          selected: _selectedLinkIds.contains(link.id),
+          onSelectChanged: _selectMode
+              ? (val) => setState(() {
+                    if (val) {
+                      _selectedLinkIds.add(link.id);
+                    } else {
+                      _selectedLinkIds.remove(link.id);
+                    }
+                  })
+              : null,
+          onFavoriteToggle: () =>
+              context.read<LinkProvider>().toggleFavorite(link.id),
+          onReadToggle: () => context.read<LinkProvider>().toggleRead(link.id),
+          onDismissConfirm: () => confirmDelete(
+            context,
+            title: t('dialog.deleteTitle'),
+            message: t('dialog.deleteMessage'),
+          ),
+          onDismissed: () => context.read<LinkProvider>().deleteLink(link.id),
+        ));
+      }
+    }
+    return items;
+  }
 
   Widget _buildBulkBar(LinkProvider provider) {
     final c = context.colors;
@@ -83,16 +273,11 @@ class _TagsScreenState extends State<TagsScreen> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Selected count
           Text(
             t('tags.selectedCount', {'n': '${_selectedLinkIds.length}'}),
-            style: GoogleFonts.outfit(
-              fontSize: 13,
-              color: c.textTertiary,
-            ),
+            style: AppFonts.body(fontSize: 13, color: c.textTertiary),
           ),
           const SizedBox(height: 8),
-          // Tag input
           TextField(
             controller: _bulkTagController,
             textCapitalization: TextCapitalization.characters,
@@ -113,15 +298,8 @@ class _TagsScreenState extends State<TagsScreen> {
                       : () async {
                           final tag = _bulkTagController.text.trim().toUpperCase();
                           if (tag.isEmpty) return;
-                          final uiState = context.read<UiStateProvider>();
-                          await provider.addTagToLinks(
-                              _selectedLinkIds.toList(), tag);
-                          uiState.setSelectMode(false);
-                          setState(() {
-                            _selectMode = false;
-                            _selectedLinkIds.clear();
-                            _bulkTagController.clear();
-                          });
+                          await provider.addTagToLinks(_selectedLinkIds.toList(), tag);
+                          _exitSelectMode();
                         },
                   style: OutlinedButton.styleFrom(
                     foregroundColor: c.accent,
@@ -138,15 +316,9 @@ class _TagsScreenState extends State<TagsScreen> {
                       : () async {
                           final tag = _bulkTagController.text.trim().toUpperCase();
                           if (tag.isEmpty) return;
-                          final uiState = context.read<UiStateProvider>();
                           await provider.removeTagFromLinks(
                               _selectedLinkIds.toList(), tag);
-                          uiState.setSelectMode(false);
-                          setState(() {
-                            _selectMode = false;
-                            _selectedLinkIds.clear();
-                            _bulkTagController.clear();
-                          });
+                          _exitSelectMode();
                         },
                   style: OutlinedButton.styleFrom(
                     foregroundColor: c.statusError,
@@ -162,47 +334,29 @@ class _TagsScreenState extends State<TagsScreen> {
     );
   }
 
+  void _exitSelectMode() {
+    context.read<UiStateProvider>().setSelectMode(false);
+    setState(() {
+      _selectMode = false;
+      _selectedLinkIds.clear();
+      _bulkTagController.clear();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
     final linkProvider = context.watch<LinkProvider>();
-    final collectionProvider = context.watch<CollectionProvider>();
-    final activeCollectionId = collectionProvider.activeCollectionId;
-
-    final scopedLinks = activeCollectionId == null
-        ? linkProvider.links
-        : linkProvider.links.where((l) => l.collectionId == activeCollectionId).toList();
-    final allTags = ({for (final l in scopedLinks) ...l.tags}).toList()..sort();
-
-    if (allTags.isEmpty) {
-      return _buildEmptyState(
-        isFiltered: activeCollectionId != null,
-        collectionName: collectionProvider.activeCollection?.name,
-        onClearFilter: () => collectionProvider.setActiveCollection(null),
-      );
-    }
-
-    final tagGroups = {
-      for (final tag in allTags)
-        tag: scopedLinks.where((l) => l.tags.contains(tag)).toList(),
-    };
-
-    final tagsToShow =
-        _selectedTags.isNotEmpty ? _selectedTags.toList() : allTags;
-    final items = <_TagListItem>[];
-    for (final tag in tagsToShow) {
-      items.add(_TagHeader(tag, tagGroups[tag]?.length ?? 0));
-      for (final link in tagGroups[tag] ?? <LinkItem>[]) {
-        items.add(_TagLink(link));
-      }
-    }
+    final links = linkProvider.links.where((l) => l.tags.contains(widget.tag)).toList();
 
     return Scaffold(
-      appBar: CollectionScopedAppBar(
-        defaultTitle: t('tags.title'),
-        activeCollectionName: collectionProvider.activeCollection?.name,
-        onClearFilter: () => collectionProvider.setActiveCollection(null),
-        extraActions: [
+      appBar: AppBar(
+        title: Text(
+          '#${widget.tag}',
+          style: AppFonts.body(fontWeight: FontWeight.w700, color: c.accent),
+        ),
+        centerTitle: true,
+        actions: [
           TextButton(
             onPressed: () {
               final newMode = !_selectMode;
@@ -215,7 +369,7 @@ class _TagsScreenState extends State<TagsScreen> {
             },
             child: Text(
               _selectMode ? t('tags.bulkDone') : t('tags.selectLinks'),
-              style: GoogleFonts.outfit(
+              style: AppFonts.body(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: _selectMode ? c.accent : c.textSecondary,
@@ -225,179 +379,23 @@ class _TagsScreenState extends State<TagsScreen> {
         ],
       ),
       body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Chip row ──────────────────────────────────────────────────────
-          SizedBox(
-            height: 52,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              itemCount: allTags.length + 1,
-              separatorBuilder: (_, __) => const SizedBox(width: 8),
-              itemBuilder: (context, i) {
-                if (i == 0) {
-                  final isAll = _selectedTags.isEmpty;
-                  return FilterChip(
-                    showCheckmark: false,
-                    avatar: Icon(
-                      isAll ? Icons.check : Icons.label_outline,
-                      size: 14,
-                      color: isAll ? c.accent : c.textTertiary,
-                    ),
-                    label: Text(
-                      t('tags.all'),
-                      style: GoogleFonts.outfit(
-                        fontSize: 12,
-                        color: c.textSecondary,
-                      ),
-                    ),
-                    selected: isAll,
-                    onSelected: (_) {
-                      setState(() {
-                        _selectedTags.clear();
-                      });
-                    },
-                    selectedColor: c.accentMuted,
-                    side: BorderSide(color: isAll ? c.accent : c.border),
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                  );
-                }
-                final tag = allTags[i - 1];
-                final isSelected = _selectedTags.contains(tag);
-                return GestureDetector(
-                  onLongPress: () {
-                    HapticFeedback.mediumImpact();
-                    _showTagActionsSheet(context, tag, linkProvider);
-                  },
-                  child: FilterChip(
-                    showCheckmark: false,
-                    avatar: Icon(
-                      isSelected ? Icons.check : Icons.label_outline,
-                      size: 14,
-                      color: isSelected ? c.accent : c.textTertiary,
-                    ),
-                    label: Text(
-                      '$tag (${tagGroups[tag]!.length})',
-                      style: GoogleFonts.outfit(
-                        fontSize: 12,
-                        color: c.textSecondary,
-                      ),
-                    ),
-                    selected: isSelected,
-                    onSelected: (_) {
-                      setState(() {
-                        if (_selectedTags.contains(tag)) {
-                          _selectedTags.remove(tag);
-                        } else {
-                          _selectedTags.add(tag);
-                        }
-                      });
-                    },
-                    selectedColor: c.accentMuted,
-                    side: BorderSide(color: isSelected ? c.accent : c.border),
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                  ),
-                );
-              },
-            ),
-          ),
-          const Divider(height: 1),
-          // ── Grouped links list ─────────────────────────────────────────────
           Expanded(
-            child: ListView.builder(
-              padding: EdgeInsets.only(
-                top: 8,
-                bottom: _selectMode ? 0 : 96,
-              ),
-              itemCount: items.length,
-              itemBuilder: (context, index) {
-                final item = items[index];
-                if (item is _TagHeader) {
-                  return Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-                    child: Row(
-                      children: [
-                        Text(
-                          '#${item.tag}',
-                          style: GoogleFonts.outfit(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: c.accent,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          '${item.count}',
-                          style: GoogleFonts.outfit(
-                            fontSize: 12,
-                            color: c.textTertiary,
-                          ),
-                        ),
-                      ],
+            child: links.isEmpty
+                ? Center(
+                    child: EmptyStateView(
+                      icon: CoolIcons.tagOff,
+                      title: t('tagFiltered.empty'),
+                      subtitle: '',
                     ),
-                  );
-                }
-                final linkItem = (item as _TagLink).link;
-                return LinkCard(
-                  key: ValueKey('${index}_${linkItem.id}'),
-                  link: linkItem,
-                  keyPrefix: '${index}_',
-                  selectable: _selectMode,
-                  selected: _selectedLinkIds.contains(linkItem.id),
-                  onSelectChanged: _selectMode
-                      ? (val) {
-                          setState(() {
-                            if (val) {
-                              _selectedLinkIds.add(linkItem.id);
-                            } else {
-                              _selectedLinkIds.remove(linkItem.id);
-                            }
-                          });
-                        }
-                      : null,
-                  onFavoriteToggle: () =>
-                      context.read<LinkProvider>().toggleFavorite(linkItem.id),
-                  onReadToggle: () =>
-                      context.read<LinkProvider>().toggleRead(linkItem.id),
-                  onDismissConfirm: () => confirmDelete(
-                    context,
-                    title: t('dialog.deleteTitle'),
-                    message: t('dialog.deleteMessage'),
+                  )
+                : ListView(
+                    padding: EdgeInsets.only(top: 8, bottom: _selectMode ? 0 : 96),
+                    children: _buildGroupedItems(context, links),
                   ),
-                  onDismissed: () =>
-                      context.read<LinkProvider>().deleteLink(linkItem.id),
-                );
-              },
-            ),
           ),
-          // ── Bulk-select bottom bar ────────────────────────────────────────
           if (_selectMode) _buildBulkBar(linkProvider),
         ],
-      ),
-    );
-  }
-
-  Widget _buildEmptyState({
-    bool isFiltered = false,
-    String? collectionName,
-    VoidCallback? onClearFilter,
-  }) {
-    return Scaffold(
-      appBar: isFiltered
-          ? CollectionScopedAppBar(
-              defaultTitle: t('tags.title'),
-              activeCollectionName: collectionName,
-              onClearFilter: onClearFilter ?? () {},
-            )
-          : null,
-      body: Center(
-        child: EmptyStateView(
-          icon: Icons.label_off_outlined,
-          title: isFiltered ? t('collections.emptyTitle') : t('tags.emptyTitle'),
-          subtitle: isFiltered ? t('collections.emptySubtitle') : t('tags.emptySubtitle'),
-        ),
       ),
     );
   }
@@ -472,7 +470,7 @@ class _TagActionsSheetState extends State<_TagActionsSheet> {
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
               child: Text(
                 '#${widget.tag}',
-                style: GoogleFonts.outfit(
+                style: AppFonts.body(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   color: c.accent,
@@ -485,7 +483,7 @@ class _TagActionsSheetState extends State<_TagActionsSheet> {
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
               child: Text(
                 t('tags.renameTag'),
-                style: GoogleFonts.outfit(
+                style: AppFonts.body(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: c.textTertiary,
@@ -527,7 +525,7 @@ class _TagActionsSheetState extends State<_TagActionsSheet> {
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                 child: Text(
                   t('tags.mergeInto'),
-                  style: GoogleFonts.outfit(
+                  style: AppFonts.body(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: c.textTertiary,
@@ -567,13 +565,13 @@ class _TagActionsSheetState extends State<_TagActionsSheet> {
             Divider(height: 1, color: c.border),
             ListTile(
               leading: Icon(
-                Icons.delete_outline,
+                CoolIcons.deleteOutline,
                 color: c.statusError,
                 size: 18,
               ),
               title: Text(
                 t('tags.deleteTag'),
-                style: GoogleFonts.outfit(color: c.statusError),
+                style: AppFonts.body(color: c.statusError),
               ),
               onTap: widget.onDelete,
             ),
@@ -606,7 +604,7 @@ class _MergeDropdownState extends State<_MergeDropdown> {
       initialValue: _selected,
       hint: Text(
         t('tags.mergeHint'),
-        style: GoogleFonts.outfit(
+        style: AppFonts.body(
           fontSize: 13,
           color: c.textTertiary,
         ),
@@ -619,7 +617,7 @@ class _MergeDropdownState extends State<_MergeDropdown> {
               value: tag,
               child: Text(
                 tag,
-                style: GoogleFonts.outfit(
+                style: AppFonts.body(
                   fontSize: 13,
                   color: c.textPrimary,
                 ),
@@ -633,19 +631,4 @@ class _MergeDropdownState extends State<_MergeDropdown> {
       },
     );
   }
-}
-
-// ── Internal list item types ──────────────────────────────────────────────────
-
-abstract class _TagListItem {}
-
-class _TagHeader extends _TagListItem {
-  final String tag;
-  final int count;
-  _TagHeader(this.tag, this.count);
-}
-
-class _TagLink extends _TagListItem {
-  final LinkItem link;
-  _TagLink(this.link);
 }

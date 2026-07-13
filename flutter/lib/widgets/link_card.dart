@@ -1,12 +1,13 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../theme/app_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/link_item.dart';
 import '../theme/app_colors.dart';
 import '../utils/i18n.dart';
 import 'action_sheet.dart';
 import 'edit_link_sheet.dart';
+import 'link_avatar.dart';
+import '../theme/cool_icons.dart';
 
 class LinkCard extends StatelessWidget {
   final LinkItem link;
@@ -27,6 +28,10 @@ class LinkCard extends StatelessWidget {
   /// Called when the user taps the read/unread toggle eye icon.
   final VoidCallback? onReadToggle;
 
+  /// Left accent stripe color — the link's folder color. Null (no folder,
+  /// or folder not resolved) means no stripe.
+  final Color? stripeColor;
+
   const LinkCard({
     super.key,
     required this.link,
@@ -38,6 +43,7 @@ class LinkCard extends StatelessWidget {
     this.selected = false,
     this.onSelectChanged,
     this.onReadToggle,
+    this.stripeColor,
   });
 
   Future<void> _openUrl(BuildContext context, String url) async {
@@ -118,13 +124,21 @@ class LinkCard extends StatelessWidget {
     showActionSheet(
       context,
       items: [
+        if (onReadToggle != null)
+          ActionSheetItem(
+            icon: link.isRead
+                ? CoolIcons.eyeOff
+                : CoolIcons.eye,
+            label: link.isRead ? t('link.markUnread') : t('link.markRead'),
+            onTap: () => onReadToggle!(),
+          ),
         ActionSheetItem(
-          icon: Icons.edit,
+          icon: CoolIcons.edit,
           label: t('linkCard.editTooltip'),
           onTap: () => _openEditSheet(context),
         ),
         ActionSheetItem(
-          icon: Icons.delete,
+          icon: CoolIcons.deleteFilled,
           label: t('common.delete'),
           color: c.statusError,
           onTap: () => _confirmAndDelete(context),
@@ -168,7 +182,7 @@ class LinkCard extends StatelessWidget {
                     link.title,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.outfit(
+                    style: AppFonts.body(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: c.textPrimary,
@@ -183,6 +197,8 @@ class LinkCard extends StatelessWidget {
       );
     }
 
+    final domain = _extractDomain(link.url);
+
     return GestureDetector(
       onLongPress: () => _showActionMenu(context),
       child: Container(
@@ -190,10 +206,7 @@ class LinkCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: c.bgSurface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: link.isRead ? c.border : c.accent,
-            width: link.isRead ? 1.0 : 1.5,
-          ),
+          border: Border.all(color: c.border),
         ),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
@@ -202,86 +215,66 @@ class LinkCard extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Thumbnail — flush left/top/bottom, fills full card height
-                if (link.thumbnail != null && link.thumbnail!.isNotEmpty)
-                  ClipRRect(
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(12),
-                      bottomLeft: Radius.circular(12),
-                    ),
-                    child: SizedBox(
-                      width: 88,
-                      child: CachedNetworkImage(
-                        imageUrl: link.thumbnail!,
-                        fit: BoxFit.cover,
-                        errorWidget: (_, __, ___) =>
-                            Container(color: c.bgElevated),
-                        placeholder: (_, __) =>
-                            Container(color: c.bgElevated),
-                      ),
+                // Left accent stripe — the link's folder color, if any.
+                if (stripeColor != null) Container(width: 4, color: stripeColor),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 14, 0, 14),
+                  // Align keeps the avatar a fixed square, top-aligned —
+                  // without it the Row's stretch forces it to full height.
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: LinkAvatar(
+                      domain: domain,
+                      imageUrl: link.thumbnail,
+                      size: 56,
                     ),
                   ),
+                ),
                 // Text content
                 Expanded(
                   child: Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      link.thumbnail != null && link.thumbnail!.isNotEmpty
-                          ? 12
-                          : 14,
-                      14,
-                      14,
-                      14,
-                    ),
+                    padding: const EdgeInsets.fromLTRB(12, 14, 8, 14),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Title row
+                        Text(
+                          link.title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppFonts.body(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: c.textPrimary,
+                            height: 1.35,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        // Unread dot + domain + time
                         Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(
-                              child: Text(
-                                link.title,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.outfit(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: c.textPrimary,
-                                  height: 1.35,
+                            if (!link.isRead) ...[
+                              Container(
+                                width: 6,
+                                height: 6,
+                                decoration: BoxDecoration(
+                                  color: c.accent,
+                                  shape: BoxShape.circle,
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 8),
-                            GestureDetector(
-                              onTap: onFavoriteToggle,
-                              child: Tooltip(
-                                message: link.isFavorite
-                                    ? t('linkCard.removeFavorite')
-                                    : t('linkCard.addFavorite'),
-                                child: Icon(
-                                  link.isFavorite
-                                      ? Icons.star
-                                      : Icons.star_border,
-                                  size: 28,
-                                  color: link.isFavorite
-                                      ? c.accent
-                                      : c.textTertiary,
+                              const SizedBox(width: 5),
+                            ],
+                            Expanded(
+                              child: Text(
+                                '$domain · ${_formatDate(link.createdAt)}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppFonts.body(
+                                  fontSize: 11,
+                                  color: c.textTertiary,
                                 ),
                               ),
                             ),
                           ],
-                        ),
-                        const SizedBox(height: 4),
-                        // Domain
-                        Text(
-                          _extractDomain(link.url),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.outfit(
-                            fontSize: 11,
-                            color: c.textTertiary,
-                          ),
                         ),
                         // Tags
                         if (link.tags.isNotEmpty) ...[
@@ -291,46 +284,52 @@ class LinkCard extends StatelessWidget {
                             runSpacing: 4,
                             children: link.tags
                                 .map(
-                                  (tag) => Chip(label: Text(tag.toUpperCase())),
+                                  (tag) => Chip(
+                                    label: Text(tag.toUpperCase()),
+                                    visualDensity: VisualDensity.compact,
+                                    materialTapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                  ),
                                 )
                                 .toList(),
                           ),
                         ],
-                        const SizedBox(height: 6),
-                        // Timestamp + read toggle
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                _formatDate(link.createdAt),
-                                style: GoogleFonts.outfit(
-                                  fontSize: 10,
-                                  color: c.textTertiary,
-                                ),
-                              ),
-                            ),
-                            if (onReadToggle != null)
-                              GestureDetector(
-                                onTap: onReadToggle,
-                                child: Tooltip(
-                                  message: link.isRead
-                                      ? t('link.markUnread')
-                                      : t('link.markRead'),
-                                  child: Icon(
-                                    link.isRead
-                                        ? Icons.visibility_outlined
-                                        : Icons.visibility_off_outlined,
-                                    size: 28,
-                                    color: link.isRead
-                                        ? c.textTertiary
-                                        : c.accent,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
                       ],
                     ),
+                  ),
+                ),
+                // Trailing actions — favorite star + overflow menu.
+                // Grouped top-right with card-matching padding so they
+                // never glue to the edge or spread apart on tall cards.
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(4, 14, 14, 14),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      GestureDetector(
+                        onTap: onFavoriteToggle,
+                        child: Tooltip(
+                          message: link.isFavorite
+                              ? t('linkCard.removeFavorite')
+                              : t('linkCard.addFavorite'),
+                          child: Icon(
+                            link.isFavorite ? CoolIcons.starFilled : CoolIcons.starOutline,
+                            size: 24,
+                            color:
+                                link.isFavorite ? c.accent : c.textTertiary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      GestureDetector(
+                        onTap: () => _showActionMenu(context),
+                        child: Icon(
+                          CoolIcons.moreVert,
+                          size: 20,
+                          color: c.textTertiary,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],

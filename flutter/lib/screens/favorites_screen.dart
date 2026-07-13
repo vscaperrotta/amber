@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_fonts.dart';
 import 'package:provider/provider.dart';
 import '../models/link_item.dart';
 import '../providers/link_provider.dart';
@@ -11,7 +12,7 @@ import '../widgets/link_card.dart';
 import '../widgets/group_header.dart';
 import '../widgets/pill_filter_chip.dart';
 import '../widgets/empty_state_view.dart';
-import '../widgets/collection_scoped_app_bar.dart';
+import '../theme/cool_icons.dart';
 
 class FavoritesScreen extends StatefulWidget {
   const FavoritesScreen({super.key});
@@ -22,6 +23,14 @@ class FavoritesScreen extends StatefulWidget {
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
   bool _showUnreadOnly = false;
+  final _searchController = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   List<Widget> _buildGroupedItems(
       BuildContext context, List<LinkItem> links) {
@@ -37,6 +46,8 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
         items.add(LinkCard(
           key: ValueKey(link.id),
           link: link,
+          stripeColor:
+              context.read<CollectionProvider>().colorForCollectionId(link.collectionId),
           onFavoriteToggle: () =>
               context.read<LinkProvider>().toggleFavorite(link.id),
           onDismissConfirm: () => confirmDelete(
@@ -56,60 +67,81 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
     final linkProvider = context.watch<LinkProvider>();
-    final collectionProvider = context.watch<CollectionProvider>();
-    final activeCollectionId = collectionProvider.activeCollectionId;
 
     var favorites = linkProvider.favoriteLinks;
-    if (activeCollectionId != null) {
-      favorites = favorites.where((l) => l.collectionId == activeCollectionId).toList();
+    if (_query.trim().isNotEmpty) {
+      final q = _query.trim().toLowerCase();
+      favorites = favorites
+          .where((l) =>
+              l.title.toLowerCase().contains(q) ||
+              l.url.toLowerCase().contains(q) ||
+              l.tags.any((tag) => tag.toLowerCase().contains(q)))
+          .toList();
     }
     final filtered = _showUnreadOnly
         ? favorites.where((l) => !l.isRead).toList()
         : favorites;
+    final isFiltered = _query.trim().isNotEmpty || _showUnreadOnly;
 
     return Scaffold(
-      appBar: CollectionScopedAppBar(
-        defaultTitle: t('favorites.title'),
-        activeCollectionName: collectionProvider.activeCollection?.name,
-        onClearFilter: () => collectionProvider.setActiveCollection(null),
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ── Filter chips ───────────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
-            child: Row(
-              children: [
-                PillFilterChip(
-                  label: t('home.filterAll'),
-                  selected: !_showUnreadOnly,
-                  onTap: () => setState(() => _showUnreadOnly = false),
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+              child: Text(
+                t('favorites.title'),
+                style: AppFonts.display(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w700,
+                  color: c.textPrimary,
                 ),
-                const SizedBox(width: 8),
-                PillFilterChip(
-                  label: t('home.filterUnread'),
-                  selected: _showUnreadOnly,
-                  onTap: () => setState(() => _showUnreadOnly = true),
-                ),
-              ],
+              ),
             ),
-          ),
-          // ── Content ────────────────────────────────────────────────────────
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: () => linkProvider.loadLinks(),
-              child: linkProvider.isLoading
-                  ? Center(
-                      child: CircularProgressIndicator(
-                          color: context.colors.accent))
-                  : filtered.isEmpty
-                      ? _buildEmptyState(activeCollectionId != null)
-                      : _buildGroupedList(context, filtered),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _searchController,
+                      onChanged: (val) => setState(() => _query = val),
+                      style: AppFonts.body(fontSize: 14, color: c.textPrimary),
+                      decoration: InputDecoration(
+                        isDense: true,
+                        hintText: t('favorites.searchHint'),
+                        prefixIcon: Icon(CoolIcons.search, size: 20, color: c.textTertiary),
+                        contentPadding:
+                            const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  PillFilterChip(
+                    label: t('home.filterUnread'),
+                    selected: _showUnreadOnly,
+                    onTap: () => setState(() => _showUnreadOnly = !_showUnreadOnly),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () => linkProvider.loadLinks(),
+                child: linkProvider.isLoading
+                    ? Center(
+                        child: CircularProgressIndicator(
+                            color: context.colors.accent))
+                    : filtered.isEmpty
+                        ? _buildEmptyState(isFiltered)
+                        : _buildGroupedList(context, filtered),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -120,9 +152,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
         const SizedBox(height: 200),
         Center(
           child: EmptyStateView(
-            icon: Icons.star_border,
-            title: isFiltered ? t('collections.emptyTitle') : t('favorites.emptyTitle'),
-            subtitle: isFiltered ? t('collections.emptySubtitle') : t('favorites.emptySubtitle'),
+            icon: CoolIcons.starOutline,
+            title: isFiltered ? t('search.emptyTitle') : t('favorites.emptyTitle'),
+            subtitle: isFiltered ? '' : t('favorites.emptySubtitle'),
           ),
         ),
       ],

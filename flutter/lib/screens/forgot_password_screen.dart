@@ -1,9 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../theme/app_fonts.dart';
 import '../theme/app_colors.dart';
 import '../utils/i18n.dart';
 import '../widgets/loading_spinner.dart';
+import '../theme/cool_icons.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -95,7 +96,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         children: [
           const SizedBox(height: 32),
           Icon(
-            Icons.lock_reset,
+            CoolIcons.lock,
             size: 80,
             color: c.accent,
           ),
@@ -103,7 +104,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           Text(
             t('auth.resetPasswordMessage'),
             textAlign: TextAlign.center,
-            style: GoogleFonts.outfit(
+            style: AppFonts.body(
               fontSize: 14,
               color: c.textSecondary,
             ),
@@ -113,7 +114,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             controller: _emailController,
             decoration: InputDecoration(
               labelText: t('auth.email'),
-              prefixIcon: const Icon(Icons.email_outlined),
+              prefixIcon: const Icon(CoolIcons.email),
               border: const OutlineInputBorder(),
             ),
             keyboardType: TextInputType.emailAddress,
@@ -156,7 +157,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       children: [
         const SizedBox(height: 64),
         Icon(
-          Icons.mark_email_read_outlined,
+          CoolIcons.emailRead,
           size: 80,
           color: c.accent,
         ),
@@ -164,7 +165,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         Text(
           t('auth.resetSent'),
           textAlign: TextAlign.center,
-          style: GoogleFonts.outfit(
+          style: AppFonts.body(
             fontSize: 16,
             fontWeight: FontWeight.w600,
             color: c.textPrimary,
@@ -174,7 +175,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         Text(
           _emailController.text,
           textAlign: TextAlign.center,
-          style: GoogleFonts.outfit(
+          style: AppFonts.body(
             fontSize: 14,
             color: c.textSecondary,
           ),

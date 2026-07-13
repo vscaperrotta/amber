@@ -92,6 +92,14 @@ class LinkProvider extends ChangeNotifier {
     await loadLinks();
   }
 
+  /// Deletes every saved link — used by the "clear library (demo)" reset.
+  Future<void> clearAll() async {
+    for (final link in _links) {
+      await _repository.deleteLink(link.id);
+    }
+    await loadLinks();
+  }
+
   Future<void> updateLink(LinkItem link) async {
     await _repository.updateLink(link);
     await loadLinks();

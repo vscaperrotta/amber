@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../theme/app_fonts.dart';
 import '../theme/app_colors.dart';
 
 /// Centered icon + title + subtitle used for every "nothing here"
@@ -29,7 +29,7 @@ class EmptyStateView extends StatelessWidget {
         const SizedBox(height: 16),
         Text(
           title,
-          style: GoogleFonts.outfit(
+          style: AppFonts.body(
             fontSize: 18,
             color: c.textTertiary,
           ),
@@ -38,7 +38,7 @@ class EmptyStateView extends StatelessWidget {
         Text(
           subtitle,
           textAlign: TextAlign.center,
-          style: GoogleFonts.outfit(
+          style: AppFonts.body(
             fontSize: 14,
             color: c.textTertiary,
           ),

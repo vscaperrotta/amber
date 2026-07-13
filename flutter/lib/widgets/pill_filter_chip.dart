@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../theme/app_fonts.dart';
 import '../theme/app_colors.dart';
 
 /// Rounded-pill toggle chip used for simple binary/set filters
@@ -34,7 +34,7 @@ class PillFilterChip extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: GoogleFonts.outfit(
+          style: AppFonts.body(
             fontSize: 13,
             fontWeight: FontWeight.w600,
             color: selected ? c.accent : c.textSecondary,
