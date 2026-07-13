@@ -13,9 +13,9 @@ Amber is a cross-platform link-saving app. Capture URLs in under 3 seconds from 
 
 | Client | Description | Stack |
 |---|---|---|
-| **Amber for Chrome** | Browser extension — save from any page, browse on new tab, side panel | React 19, Vite, Firebase, SCSS |
-| **Amber for Mobile** | iOS & Android app — capture and recall links on the go | Flutter/Dart, Firebase, SQLite |
-| **Amber for Obsidian** | Obsidian plugin — manage saved links inside your vault | TypeScript, esbuild, Firebase, SCSS |
+| **[Amber for Chrome](./browser/README.md)** | Browser extension — save from any page, browse on new tab, side panel | React 19, Vite, Firebase, SCSS |
+| **[Amber for Mobile](./flutter/README.md)** | iOS & Android app — capture and recall links on the go | Flutter/Dart, Firebase, SQLite |
+| **[Amber for Obsidian](./obsidian/README.md)** | Obsidian plugin — manage saved links inside your vault | TypeScript, esbuild, Firebase, SCSS |
 
 ---
 
@@ -62,6 +62,7 @@ Amber is a cross-platform link-saving app. Capture URLs in under 3 seconds from 
 ### Sync & Storage
 
 - **Cloud sync** — Firebase Auth (email/password or Google sign-in) + Firestore with real-time `onSnapshot` listener
+- **Registration & password recovery (Browser)** — create an account and reset a forgotten password directly from the extension's Options page
 - **Offline / local fallback** — links stored locally when logged out (IndexedDB in browser, SQLite on mobile, JSON file in Obsidian); synced automatically on login
 - **Migration on login** — local links migrate to Firestore on sign-in, local storage is cleared
 
@@ -92,8 +93,8 @@ Amber is a cross-platform link-saving app. Capture URLs in under 3 seconds from 
 
 ## Screenshots
 
-| Home | Edit link | Tags |
-|---|---|---|
+| Home |
+|---|
 | <img src="./brand/home.png" width="280" /> | <img src="./brand/edit.png" width="280" /> | <img src="./brand/tag.png" width="280" /> |
 
 ---
