@@ -27,7 +27,8 @@ export default defineConfig({
       input: {
         background: path.resolve(APP_DIR, 'background', 'index.js'),
         content: path.resolve(APP_DIR, 'content', 'index.jsx'),
-        newtab: path.resolve(APP_DIR, 'newtab', 'index.html'),
+        // newtab removed from build — source kept only for shared components (TagEditor, UserModal)
+        // newtab: path.resolve(APP_DIR, 'newtab', 'index.html'),
         options: path.resolve(APP_DIR, 'options', 'index.html'),
         popup: path.resolve(APP_DIR, 'popup', 'index.html'),
         sidepanel: path.resolve(APP_DIR, 'sidepanel', 'index.html'),

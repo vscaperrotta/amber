@@ -32,6 +32,8 @@ This is an Obsidian plugin (TypeScript + esbuild) that lets users save and manag
 
 **Legacy book library:** `src/services/storage.ts` and types in `src/types/` (`BookType`, `DataType`, etc.) represent an older reading-collection feature (books/manga). The `Data` type wraps a `Book[]` array with metadata. This is largely superseded by the links feature but the settings tab still surfaces it.
 
-**Styles:** `src/styles/main.scss` imports all partials. Component styles are in `src/styles/components/`, view styles in `src/styles/views/`. CSS class prefix: `obs-plugin-amber-`.
+**Styles:** `src/styles/main.scss` imports all partials. Component styles are in `src/styles/components/`, view styles in `src/styles/views/`. CSS class prefix: `obs-amber-`.
+
+**i18n:** `src/utils/i18n.ts` exports a `t(key)` function with `en` and `it` dictionaries (auto-detected from Obsidian's locale). All UI strings go through `t()` — never hardcode strings.
 
 **UI components:** `src/components/` contains small helpers (`renderInput`, `renderHeader`, etc.) that return/append DOM elements using Obsidian's `createEl` API.

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Build & Dev Commands
 
-**Node requirement:** Node.js ≥ 22 (`.nvmrc` → `22.22.2`). Run `nvm use` before any command.
+**Node requirement:** Node.js ≥ 22 (declared in `package.json` `engines.node`). If using nvm, run `nvm use` with a compatible version before any command.
 
 **Package manager: npm only — never yarn.** Lockfile is `package-lock.json`. Don't run `yarn install`/`yarn build`/etc., and don't commit a `yarn.lock`.
 
@@ -24,7 +24,7 @@ No test runner is configured.
 
 ## Architecture
 
-Manifest V3 Chrome extension ("Amber") for saving/organizing favorite websites. Four independently bundled contexts built in a single Vite pass (multi-entry Rollup):
+Manifest V3 Chrome extension ("Amber") for saving/organizing favorite websites. Five independently bundled contexts built in a single Vite pass (multi-entry Rollup):
 
 | Context | Entry | Notes |
 |---|---|---|
@@ -39,24 +39,7 @@ Manifest V3 Chrome extension ("Amber") for saving/organizing favorite websites. 
 **Manifest generation:** `src/manifest.js` → `scripts/manifest.js` → `dist/manifest.json` (post-build). Edit `src/manifest.js` to change permissions or metadata. Output filenames have **no content hashes** so manifest can reference them predictably.
 
 **Path aliases** (defined in `vite.config.js`):
-`@background`, `@content`, `@options`, `@popup`, `@newtab`, `@components`, `@styles`, `@utils`
-
-## Reference Architecture
-
-**Before implementing any feature, fix, or pattern, consult [`REFERENCE.md`](./REFERENCE.md).**
-
-`REFERENCE.md` documents the `REFERENCE/extension-save-to-pocket` codebase — a production-grade MV3 Chrome extension with patterns directly applicable to Amber. Key areas to check before acting:
-
-| Task | What to look up in REFERENCE.md |
-|---|---|
-| Messaging between background/content | Message-Driven Architecture, Action constants pattern |
-| Component with logic + UI | Smart/Dumb component pattern (`connectors/` + `components/`) |
-| Toolbar icon state | Icone Dinamiche via OffscreenCanvas |
-| Storage read/write | Storage wrapper (`getSetting`/`setSettings`) |
-| Deriving item data (title, thumbnail) | `deriveItemData()` fallback chain |
-| Content script UI isolation | `all: unset` style isolation |
-| Post-action side effects | `postSave.js` separation pattern |
-| Action string constants | `actions.js` centralisation |
+`@background`, `@options`, `@popup`, `@newtab`, `@components`, `@styles`, `@utils`
 
 ## Storybook
 

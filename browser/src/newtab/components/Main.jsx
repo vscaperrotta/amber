@@ -2,6 +2,7 @@ import PropTypes from "prop-types";
 import { useState, useMemo } from 'react';
 import { useLinks } from '@utils/useLinks';
 import { useCollections } from '@utils/useCollections';
+import { useUserSettings } from '@utils/useUserSettings.js';
 import Sidebar from '@components/Sidebar';
 import EditModal from './EditModal.jsx';
 import HomeView from '@newtab/views/HomeView.jsx';
@@ -11,6 +12,8 @@ import TagsView from '@newtab/views/TagsView.jsx';
 export default function Main(props) {
 	const { links, loading, deleteLink, updateLink, saveCustomLink } = useLinks();
 	const { collections, addCollection, renameCollection, deleteCollection } = useCollections();
+	const { settings } = useUserSettings();
+	const newtabEnabled = settings.newtabEnabled !== false;
 	const [activeView, setActiveView] = useState('home');
 	const [activeCollectionId, setActiveCollectionId] = useState(null);
 
@@ -114,6 +117,7 @@ export default function Main(props) {
 				collectionCounts={collectionCounts}
 			/>
 
+			{newtabEnabled && (
 			<section className="newtab__main-content">
 				{activeView === 'home' && (
 					<HomeView
@@ -148,6 +152,7 @@ export default function Main(props) {
 					/>
 				)}
 				</section>
+			)}
 
 			{isModalOpen && (
 				<EditModal

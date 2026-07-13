@@ -28,7 +28,8 @@ body {
 
 .options__title {
 	color: var(--text-primary);
-	font-size: 1.25rem;
+	font-family: var(--font-heading);
+	font-size: 1.3125rem;
 	font-weight: 700;
 	letter-spacing: -0.01em;
 	margin: 0;
@@ -359,6 +360,27 @@ body {
 	&:focus-visible {
 		outline: none;
 		box-shadow: var(--shadow-focus);
+	}
+}
+
+.options__account-links {
+	display: flex;
+	gap: var(--space-md);
+	justify-content: space-between;
+}
+
+.options__link-btn {
+	background: none;
+	border: none;
+	color: var(--text-secondary);
+	cursor: pointer;
+	font-family: var(--font-display);
+	font-size: 0.75rem;
+	padding: 0;
+	text-decoration: underline;
+
+	&:hover {
+		color: var(--text-primary);
 	}
 }
 

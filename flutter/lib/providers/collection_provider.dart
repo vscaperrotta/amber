@@ -23,16 +23,18 @@ class CollectionProvider extends ChangeNotifier {
   final CollectionRepository _repository = CollectionRepository();
   List<CollectionItem> _collections = [];
   bool _isLoading = false;
-  String? _activeCollectionId;
 
   List<CollectionItem> get collections => _collections;
   bool get isLoading => _isLoading;
-  String? get activeCollectionId => _activeCollectionId;
 
-  CollectionItem? get activeCollection =>
-      _activeCollectionId != null
-          ? _collections.where((c) => c.id == _activeCollectionId).firstOrNull
-          : null;
+  /// The folder color for [collectionId], or null if the link has no
+  /// folder (or it was deleted) — used for the LinkCard side stripe.
+  Color? colorForCollectionId(String? collectionId) {
+    if (collectionId == null) return null;
+    final idx = _collections.indexWhere((c) => c.id == collectionId);
+    if (idx == -1) return null;
+    return collectionColor(_collections[idx].color, fallbackIndex: idx);
+  }
 
   Future<void> loadCollections() async {
     _isLoading = true;
@@ -43,11 +45,6 @@ class CollectionProvider extends ChangeNotifier {
       debugPrint('[CollectionProvider] error loading: $e');
     }
     _isLoading = false;
-    notifyListeners();
-  }
-
-  void setActiveCollection(String? id) {
-    _activeCollectionId = id;
     notifyListeners();
   }
 
@@ -66,9 +63,6 @@ class CollectionProvider extends ChangeNotifier {
 
   Future<void> deleteCollection(String id) async {
     await _repository.deleteCollection(id);
-    if (_activeCollectionId == id) {
-      _activeCollectionId = null;
-    }
     await loadCollections();
   }
 }

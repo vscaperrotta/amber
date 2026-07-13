@@ -2,8 +2,11 @@ import { useState, useMemo } from 'react';
 import {
 	signOut,
 	signInWithEmailAndPassword,
+	createUserWithEmailAndPassword,
+	sendPasswordResetEmail,
 	signInWithPopup,
 	GoogleAuthProvider,
+	updateProfile,
 } from '@firebase/auth';
 import { LayoutGrid, List, Download, Upload } from 'lucide-react';
 import Browser from 'webextension-polyfill';
@@ -85,6 +88,39 @@ export default function App() {
 		} catch (err) {
 			const msg = mapFirebaseError(err.code);
 			if (msg) setError(msg);
+		} finally {
+			setLoading(false);
+		}
+	}
+
+	async function handleSignUp({ email: signUpEmail, password: signUpPassword, username }) {
+		setError('');
+		setLoading(true);
+		try {
+			const credential = await createUserWithEmailAndPassword(auth, signUpEmail, signUpPassword);
+			if (username?.trim()) {
+				await updateProfile(credential.user, { displayName: username.trim() });
+			}
+			setEmail('');
+			setPassword('');
+		} catch (err) {
+			const msg = mapFirebaseError(err.code);
+			if (msg) setError(msg);
+		} finally {
+			setLoading(false);
+		}
+	}
+
+	async function handleForgotPassword(resetEmail) {
+		setError('');
+		setLoading(true);
+		try {
+			await sendPasswordResetEmail(auth, resetEmail);
+			return true;
+		} catch (err) {
+			const msg = mapFirebaseError(err.code);
+			if (msg) setError(msg);
+			return false;
 		} finally {
 			setLoading(false);
 		}
@@ -222,7 +258,10 @@ export default function App() {
 						error={error}
 						loading={loading}
 						onSignIn={handleSignIn}
+						onSignUp={handleSignUp}
+						onForgotPassword={handleForgotPassword}
 						onGoogleSignIn={handleGoogleSignIn}
+						onClearError={() => setError('')}
 					/>
 				)}
 			</section>

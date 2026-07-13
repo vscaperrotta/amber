@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../theme/app_fonts.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart' as app;
-import '../theme/void_colors.dart';
+import '../theme/app_colors.dart';
 import '../utils/i18n.dart';
+import '../widgets/loading_spinner.dart';
+import 'forgot_password_screen.dart';
+import '../theme/cool_icons.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -61,19 +64,13 @@ class _AuthScreenState extends State<AuthScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 32),
-              const Icon(
-                Icons.account_circle,
-                size: 80,
-                color: VoidColors.darkAccent,
-              ),
-              const SizedBox(height: 12),
               Text(
                 'Amber',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.outfit(
+                style: AppFonts.body(
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
-                  color: VoidColors.darkTextPrimary,
+                  color: context.colors.textPrimary,
                   letterSpacing: -0.3,
                 ),
               ),
@@ -82,7 +79,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 controller: _emailController,
                 decoration: InputDecoration(
                   labelText: t('auth.email'),
-                  prefixIcon: const Icon(Icons.email_outlined),
+                  prefixIcon: const Icon(CoolIcons.email),
                   border: const OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.emailAddress,
@@ -102,13 +99,13 @@ class _AuthScreenState extends State<AuthScreen> {
                 controller: _passwordController,
                 decoration: InputDecoration(
                   labelText: t('auth.password'),
-                  prefixIcon: const Icon(Icons.lock_outlined),
+                  prefixIcon: const Icon(CoolIcons.lock),
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscurePassword
-                          ? Icons.visibility_off
-                          : Icons.visibility,
+                          ? CoolIcons.eyeOff
+                          : CoolIcons.eye,
                     ),
                     onPressed: () {
                       setState(() => _obscurePassword = !_obscurePassword);
@@ -127,6 +124,19 @@ class _AuthScreenState extends State<AuthScreen> {
                 },
               ),
               const SizedBox(height: 8),
+              if (_isLogin)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const ForgotPasswordScreen(),
+                      ),
+                    ),
+                    child: Text(t('auth.forgotPassword')),
+                  ),
+                ),
               if (authProvider.error != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8),
@@ -143,14 +153,7 @@ class _AuthScreenState extends State<AuthScreen> {
               FilledButton(
                 onPressed: authProvider.isLoading ? null : _submit,
                 child: authProvider.isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: VoidColors.accentOnPrimary,
-                        ),
-                      )
+                    ? const LoadingSpinner()
                     : Text(_isLogin ? t('auth.signIn') : t('auth.signUp')),
               ),
               const SizedBox(height: 16),

@@ -27,7 +27,7 @@ class LinkItem {
        tags = tags ?? const [],
        createdAt = createdAt ?? DateTime.now(),
        isFavorite = isFavorite ?? false,
-       isRead = isRead ?? true;
+       isRead = isRead ?? false;
 
   Map<String, dynamic> toMap() {
     return {
@@ -113,7 +113,7 @@ class LinkItem {
       return metadata['isRead'] as bool;
     }
     if (map['is_read'] is int) return (map['is_read'] as int) == 1;
-    return true;
+    return false;
   }
 
   static String? _parseThumbnail(Map<String, dynamic> map) {

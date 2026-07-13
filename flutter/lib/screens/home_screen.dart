@@ -1,45 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../theme/app_fonts.dart';
 import 'package:provider/provider.dart';
 import '../models/link_item.dart';
+import '../models/link_filter.dart';
 import '../providers/link_provider.dart';
 import '../providers/collection_provider.dart';
-import '../theme/void_colors.dart';
+import '../theme/app_colors.dart';
 import '../utils/i18n.dart';
+import '../utils/time_bucket.dart';
+import '../utils/dialogs.dart';
+import '../utils/collection_dialogs.dart';
 import '../widgets/link_card.dart';
-
-// ── Time bucket helpers ────────────────────────────────────────────────────────
-
-enum _TimeBucket { today, yesterday, thisWeek, thisMonth, earlier }
-
-_TimeBucket _bucketFor(DateTime date) {
-  final now = DateTime.now();
-  final today = DateTime(now.year, now.month, now.day);
-  final d = DateTime(date.year, date.month, date.day);
-  final diff = today.difference(d).inDays;
-  if (diff == 0) return _TimeBucket.today;
-  if (diff == 1) return _TimeBucket.yesterday;
-  if (diff <= 7) return _TimeBucket.thisWeek;
-  if (diff <= 30) return _TimeBucket.thisMonth;
-  return _TimeBucket.earlier;
-}
-
-String _bucketLabel(_TimeBucket bucket) {
-  switch (bucket) {
-    case _TimeBucket.today:
-      return t('home.groupToday');
-    case _TimeBucket.yesterday:
-      return t('home.groupYesterday');
-    case _TimeBucket.thisWeek:
-      return t('home.groupThisWeek');
-    case _TimeBucket.thisMonth:
-      return t('home.groupThisMonth');
-    case _TimeBucket.earlier:
-      return t('home.groupEarlier');
-  }
-}
-
-// ── HomeScreen ─────────────────────────────────────────────────────────────────
+import '../widgets/group_header.dart';
+import '../widgets/empty_state_view.dart';
+import '../widgets/filter_sheet.dart';
+import '../widgets/header_icon_button.dart';
+import 'search_screen.dart';
+import '../theme/cool_icons.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -49,49 +26,30 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  bool _showUnreadOnly = false;
+  LinkFilter _filter = const LinkFilter();
 
   List<Widget> _buildGroupedList(BuildContext context, List<LinkItem> links) {
-    final grouped = <_TimeBucket, List<LinkItem>>{};
-    for (final link in links) {
-      final b = _bucketFor(link.createdAt);
-      grouped.putIfAbsent(b, () => []).add(link);
-    }
-
-    final order = _TimeBucket.values;
+    final grouped = groupByTimeBucket(links);
     final items = <Widget>[];
 
-    for (final bucket in order) {
+    for (final bucket in TimeBucket.values) {
       final bucketLinks = grouped[bucket];
       if (bucketLinks == null || bucketLinks.isEmpty) continue;
 
-      items.add(_GroupHeader(label: _bucketLabel(bucket)));
+      items.add(GroupHeader(label: bucketLabel(bucket)));
 
       for (final link in bucketLinks) {
         items.add(LinkCard(
           key: ValueKey(link.id),
           link: link,
+          stripeColor:
+              context.read<CollectionProvider>().colorForCollectionId(link.collectionId),
           onFavoriteToggle: () =>
               context.read<LinkProvider>().toggleFavorite(link.id),
-          onDismissConfirm: () => showDialog<bool>(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: Text(t('dialog.deleteTitle')),
-              content: Text(t('dialog.deleteMessage')),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context, false),
-                  child: Text(t('common.cancel')),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.pop(context, true),
-                  child: Text(
-                    t('common.delete'),
-                    style: const TextStyle(color: VoidColors.darkStatusError),
-                  ),
-                ),
-              ],
-            ),
+          onDismissConfirm: () => confirmDelete(
+            context,
+            title: t('dialog.deleteTitle'),
+            message: t('dialog.deleteMessage'),
           ),
           onDismissed: () => context.read<LinkProvider>().deleteLink(link.id),
           onReadToggle: () => context.read<LinkProvider>().toggleRead(link.id),
@@ -102,244 +60,93 @@ class _HomeScreenState extends State<HomeScreen> {
     return items;
   }
 
-  void _showAddCollectionDialog(BuildContext context) {
-    final controller = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(t('collections.addTitle')),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: InputDecoration(hintText: t('collections.nameHint')),
-          textCapitalization: TextCapitalization.sentences,
-          onSubmitted: (val) {
-            if (val.trim().isNotEmpty) {
-              context.read<CollectionProvider>().addCollection(val.trim());
-              Navigator.pop(ctx);
-            }
-          },
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(t('common.cancel')),
-          ),
-          TextButton(
-            onPressed: () {
-              final val = controller.text.trim();
-              if (val.isNotEmpty) {
-                context.read<CollectionProvider>().addCollection(val);
-                Navigator.pop(ctx);
-              }
-            },
-            child: Text(t('collections.add')),
-          ),
-        ],
-      ),
+  Future<void> _openFilterSheet(BuildContext context) async {
+    final linkProvider = context.read<LinkProvider>();
+    final collectionProvider = context.read<CollectionProvider>();
+    final result = await showFilterSheet(
+      context,
+      current: _filter,
+      collections: collectionProvider.collections,
+      links: linkProvider.links,
+      onAddCollection: () => showAddCollectionDialog(context),
+      onCollectionLongPress: (c) => showCollectionOptionsSheet(context, c),
     );
-  }
-
-  void _showCollectionOptions(BuildContext context, collection) {
-    showModalBottomSheet(
-      context: context,
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.drive_file_rename_outline),
-              title: Text(t('collections.rename')),
-              onTap: () {
-                Navigator.pop(ctx);
-                _showRenameDialog(context, collection);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.delete_outline, color: VoidColors.darkStatusError),
-              title: Text(
-                t('common.delete'),
-                style: const TextStyle(color: VoidColors.darkStatusError),
-              ),
-              onTap: () {
-                Navigator.pop(ctx);
-                _showDeleteConfirm(context, collection);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showRenameDialog(BuildContext context, collection) {
-    final controller = TextEditingController(text: collection.name);
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(t('collections.rename')),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: InputDecoration(hintText: t('collections.nameHint')),
-          textCapitalization: TextCapitalization.sentences,
-          onSubmitted: (val) {
-            if (val.trim().isNotEmpty) {
-              context.read<CollectionProvider>().renameCollection(collection.id, val.trim());
-              Navigator.pop(ctx);
-            }
-          },
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(t('common.cancel')),
-          ),
-          TextButton(
-            onPressed: () {
-              final val = controller.text.trim();
-              if (val.isNotEmpty) {
-                context.read<CollectionProvider>().renameCollection(collection.id, val);
-                Navigator.pop(ctx);
-              }
-            },
-            child: Text(t('common.save')),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showDeleteConfirm(BuildContext context, collection) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(t('collections.deleteConfirm')),
-        content: Text(t('collections.deleteMessage')),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(t('common.cancel')),
-          ),
-          TextButton(
-            onPressed: () {
-              context.read<CollectionProvider>().deleteCollection(collection.id);
-              Navigator.pop(ctx);
-            },
-            child: Text(
-              t('common.delete'),
-              style: const TextStyle(color: VoidColors.darkStatusError),
-            ),
-          ),
-        ],
-      ),
-    );
+    if (result != null && mounted) {
+      setState(() => _filter = result);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
     final linkProvider = context.watch<LinkProvider>();
     final collectionProvider = context.watch<CollectionProvider>();
-    final collections = collectionProvider.collections;
-    final activeCollectionId = collectionProvider.activeCollectionId;
 
-    var allLinks = linkProvider.links;
-
-    if (activeCollectionId != null) {
-      allLinks = allLinks.where((l) => l.collectionId == activeCollectionId).toList();
+    var filteredLinks = linkProvider.links;
+    if (_filter.collectionId != null) {
+      filteredLinks = filteredLinks
+          .where((l) => l.collectionId == _filter.collectionId)
+          .toList();
+    }
+    if (_filter.unreadOnly) {
+      filteredLinks = filteredLinks.where((l) => !l.isRead).toList();
+    }
+    if (_filter.tags.isNotEmpty) {
+      filteredLinks = filteredLinks
+          .where((l) => l.tags.any(_filter.tags.contains))
+          .toList();
     }
 
-    final filteredLinks = _showUnreadOnly
-        ? allLinks.where((l) => !l.isRead).toList()
-        : allLinks;
-
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          activeCollectionId != null
-              ? (collectionProvider.activeCollection?.name ?? t('home.title'))
-              : t('home.title'),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.w700),
-        ),
-        centerTitle: true,
-        actions: activeCollectionId != null
-            ? [
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  tooltip: t('collections.clearFilter'),
-                  onPressed: () => collectionProvider.setActiveCollection(null),
-                ),
-              ]
-            : null,
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ── Collection chips + add button ─────────────────────────────────
-          SizedBox(
-            height: 44,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              children: [
-                _CollectionChip(
-                  label: t('home.filterAll'),
-                  selected: activeCollectionId == null,
-                  onTap: () => collectionProvider.setActiveCollection(null),
-                  icon: Icons.inbox_outlined,
-                ),
-                const SizedBox(width: 6),
-                ...collections.asMap().entries.map((e) => Padding(
-                  padding: const EdgeInsets.only(right: 6),
-                  child: _CollectionChip(
-                    label: e.value.name,
-                    selected: activeCollectionId == e.value.id,
-                    color: e.value.color,
-                    colorFallbackIndex: e.key,
-                    onTap: () => collectionProvider.setActiveCollection(e.value.id),
-                    onLongPress: () => _showCollectionOptions(context, e.value),
-                    icon: Icons.folder_outlined,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Header: app title + search + filter ─────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 12, 16, 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      t('home.title'),
+                      style: AppFonts.display(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w700,
+                        color: c.textPrimary,
+                      ),
+                    ),
                   ),
-                )),
-                // Add collection button
-                _AddCollectionChip(
-                  onTap: () => _showAddCollectionDialog(context),
-                ),
-              ],
+                  HeaderIconButton(
+                    icon: CoolIcons.search,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const SearchScreen()),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  HeaderIconButton(
+                    icon: CoolIcons.tune,
+                    badge: _filter.activeCount > 0 ? _filter.activeCount : null,
+                    onTap: () => _openFilterSheet(context),
+                  ),
+                ],
+              ),
             ),
-          ),
-          // ── Filter chips ─────────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
-            child: Row(
-              children: [
-                _FilterChip(
-                  label: t('home.filterAll'),
-                  selected: !_showUnreadOnly,
-                  onTap: () => setState(() => _showUnreadOnly = false),
-                ),
-                const SizedBox(width: 8),
-                _FilterChip(
-                  label: t('home.filterUnread'),
-                  selected: _showUnreadOnly,
-                  onTap: () => setState(() => _showUnreadOnly = true),
-                ),
-              ],
+            // ── Main content ─────────────────────────────────────────────────
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () => linkProvider.loadLinks(),
+                child: (linkProvider.isLoading || collectionProvider.isLoading) &&
+                        linkProvider.links.isEmpty
+                    ? Center(child: CircularProgressIndicator(color: c.accent))
+                    : filteredLinks.isEmpty
+                        ? _buildEmptyState(_filter.isActive)
+                        : _buildGroupedListView(context, filteredLinks),
+              ),
             ),
-          ),
-          // ── Main content ─────────────────────────────────────────────────
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: () => linkProvider.loadLinks(),
-              child: linkProvider.isLoading
-                  ? const Center(
-                      child: CircularProgressIndicator(color: VoidColors.darkAccent))
-                  : filteredLinks.isEmpty
-                      ? _buildEmptyState(activeCollectionId != null)
-                      : _buildGroupedListView(context, filteredLinks),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -349,33 +156,10 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         const SizedBox(height: 200),
         Center(
-          child: Column(
-            children: [
-              Icon(
-                isFiltered ? Icons.folder_open : Icons.link_off,
-                size: 64,
-                color: VoidColors.darkTextTertiary,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                isFiltered ? t('collections.emptyTitle') : t('home.emptyTitle'),
-                style: GoogleFonts.outfit(
-                  fontSize: 18,
-                  color: VoidColors.darkTextTertiary,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                isFiltered
-                    ? t('collections.emptySubtitle')
-                    : t('home.emptySubtitle'),
-                textAlign: TextAlign.center,
-                style: GoogleFonts.outfit(
-                  fontSize: 14,
-                  color: VoidColors.darkTextTertiary,
-                ),
-              ),
-            ],
+          child: EmptyStateView(
+            icon: isFiltered ? CoolIcons.filterOff : CoolIcons.linkOff,
+            title: isFiltered ? t('collections.emptyTitle') : t('home.emptyTitle'),
+            subtitle: isFiltered ? t('collections.emptySubtitle') : t('home.emptySubtitle'),
           ),
         ),
       ],
@@ -388,198 +172,6 @@ class _HomeScreenState extends State<HomeScreen> {
       padding: const EdgeInsets.only(bottom: 96),
       itemCount: items.length,
       itemBuilder: (_, i) => items[i],
-    );
-  }
-}
-
-// ── Collection chip ────────────────────────────────────────────────────────────
-
-class _CollectionChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-  final VoidCallback? onLongPress;
-  final IconData icon;
-  final String? color;
-  final int colorFallbackIndex;
-
-  const _CollectionChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-    required this.icon,
-    this.onLongPress,
-    this.color,
-    this.colorFallbackIndex = 0,
-  });
-
-  Color get _resolvedColor {
-    final hex = (color?.isNotEmpty == true
-            ? color!
-            : _kCollectionColorFallbacks[colorFallbackIndex % _kCollectionColorFallbacks.length])
-        .replaceAll('#', '');
-    return Color(int.parse('FF$hex', radix: 16));
-  }
-
-  static const _kCollectionColorFallbacks = [
-    '#F5A623', '#5096F0', '#50D282', '#EE5555',
-    '#A78BFA', '#4ECDC4', '#FF8C42', '#F06292',
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    final chipColor = (color != null || label != t('home.filterAll'))
-        ? _resolvedColor
-        : VoidColors.darkAccent;
-
-    return GestureDetector(
-      onTap: onTap,
-      onLongPress: onLongPress,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        decoration: BoxDecoration(
-          color: selected
-              ? chipColor.withAlpha(38)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: selected ? chipColor : VoidColors.darkBorder,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (color != null) ...[
-              Container(
-                width: 7,
-                height: 7,
-                decoration: BoxDecoration(
-                  color: chipColor,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const SizedBox(width: 5),
-            ] else ...[
-              Icon(
-                icon,
-                size: 14,
-                color: selected ? chipColor : VoidColors.darkTextSecondary,
-              ),
-              const SizedBox(width: 4),
-            ],
-            Text(
-              label,
-              style: GoogleFonts.outfit(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: selected ? chipColor : VoidColors.darkTextSecondary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ── Add collection chip ────────────────────────────────────────────────────────
-
-class _AddCollectionChip extends StatelessWidget {
-  final VoidCallback onTap;
-
-  const _AddCollectionChip({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: VoidColors.darkBorder),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.add, size: 14, color: VoidColors.darkTextTertiary),
-            const SizedBox(width: 4),
-            Text(
-              t('collections.add'),
-              style: GoogleFonts.outfit(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: VoidColors.darkTextTertiary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ── Filter chip ────────────────────────────────────────────────────────────────
-
-class _FilterChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _FilterChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-        decoration: BoxDecoration(
-          color: selected ? VoidColors.darkAccentMuted : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: selected ? VoidColors.darkAccent : VoidColors.darkBorder,
-          ),
-        ),
-        child: Text(
-          label,
-          style: GoogleFonts.outfit(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: selected ? VoidColors.darkAccent : VoidColors.darkTextSecondary,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ── Group header ───────────────────────────────────────────────────────────────
-
-class _GroupHeader extends StatelessWidget {
-  final String label;
-
-  const _GroupHeader({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-      child: Text(
-        label.toUpperCase(),
-        style: GoogleFonts.outfit(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: VoidColors.darkTextTertiary,
-          letterSpacing: 0.6,
-        ),
-      ),
     );
   }
 }

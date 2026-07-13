@@ -1,6 +1,6 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Agents when working with code in this repository.
 
 ## Repository Structure
 
@@ -12,10 +12,10 @@ Monorepo for **Amber** — a cross-platform link-saving app (save/organize URLs,
 | `flutter/` | Mobile app | Flutter/Dart, Firebase, SQLite |
 | `obsidian/` | Obsidian plugin | TypeScript, esbuild, Firebase, SCSS |
 
-Each sub-project has its own `CLAUDE.md` with full details:
-- [`browser/CLAUDE.md`](browser/CLAUDE.md)
-- [`flutter/CLAUDE.md`](flutter/CLAUDE.md)
-- [`obsidian/CLAUDE.md`](obsidian/CLAUDE.md)
+Each sub-project has its own `AGENTS.md` with full details:
+- [`browser/AGENTS.md`](browser/AGENTS.md)
+- [`flutter/AGENTS.md`](flutter/AGENTS.md)
+- [`obsidian/AGENTS.md`](obsidian/AGENTS.md)
 
 ## Shared Concepts
 
@@ -46,4 +46,4 @@ Void v2 — see [`DESIGN.md`](DESIGN.md) for full token reference. Key tokens:
 | text-secondary | `#C0C0D0` | — |
 | border | `#303048` | `#D0D0E0` |
 
-Font: **Outfit** (400/600/700) everywhere.
+Font: **Outfit** in the browser; Flutter uses **Mulish** (body) + **Baloo2** (display headings) bundled locally; Obsidian inherits from the host theme.

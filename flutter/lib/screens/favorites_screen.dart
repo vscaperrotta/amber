@@ -1,44 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../theme/app_fonts.dart';
 import 'package:provider/provider.dart';
 import '../models/link_item.dart';
 import '../providers/link_provider.dart';
-import '../theme/void_colors.dart';
+import '../providers/collection_provider.dart';
+import '../theme/app_colors.dart';
 import '../utils/i18n.dart';
+import '../utils/time_bucket.dart';
+import '../utils/dialogs.dart';
 import '../widgets/link_card.dart';
-
-// ── Time bucket helpers (mirrors home_screen.dart) ────────────────────────────
-
-enum _TimeBucket { today, yesterday, thisWeek, thisMonth, earlier }
-
-_TimeBucket _bucketFor(DateTime date) {
-  final now = DateTime.now();
-  final today = DateTime(now.year, now.month, now.day);
-  final d = DateTime(date.year, date.month, date.day);
-  final diff = today.difference(d).inDays;
-  if (diff == 0) return _TimeBucket.today;
-  if (diff == 1) return _TimeBucket.yesterday;
-  if (diff <= 7) return _TimeBucket.thisWeek;
-  if (diff <= 30) return _TimeBucket.thisMonth;
-  return _TimeBucket.earlier;
-}
-
-String _bucketLabel(_TimeBucket bucket) {
-  switch (bucket) {
-    case _TimeBucket.today:
-      return t('home.groupToday');
-    case _TimeBucket.yesterday:
-      return t('home.groupYesterday');
-    case _TimeBucket.thisWeek:
-      return t('home.groupThisWeek');
-    case _TimeBucket.thisMonth:
-      return t('home.groupThisMonth');
-    case _TimeBucket.earlier:
-      return t('home.groupEarlier');
-  }
-}
-
-// ── FavoritesScreen ───────────────────────────────────────────────────────────
+import '../widgets/group_header.dart';
+import '../widgets/pill_filter_chip.dart';
+import '../widgets/empty_state_view.dart';
+import '../theme/cool_icons.dart';
 
 class FavoritesScreen extends StatefulWidget {
   const FavoritesScreen({super.key});
@@ -49,47 +23,37 @@ class FavoritesScreen extends StatefulWidget {
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
   bool _showUnreadOnly = false;
+  final _searchController = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   List<Widget> _buildGroupedItems(
       BuildContext context, List<LinkItem> links) {
-    final grouped = <_TimeBucket, List<LinkItem>>{};
-    for (final link in links) {
-      final b = _bucketFor(link.createdAt);
-      grouped.putIfAbsent(b, () => []).add(link);
-    }
-
+    final grouped = groupByTimeBucket(links);
     final items = <Widget>[];
-    for (final bucket in _TimeBucket.values) {
+    for (final bucket in TimeBucket.values) {
       final bucketLinks = grouped[bucket];
       if (bucketLinks == null || bucketLinks.isEmpty) continue;
 
-      items.add(_GroupHeader(label: _bucketLabel(bucket)));
+      items.add(GroupHeader(label: bucketLabel(bucket)));
 
       for (final link in bucketLinks) {
         items.add(LinkCard(
           key: ValueKey(link.id),
           link: link,
+          stripeColor:
+              context.read<CollectionProvider>().colorForCollectionId(link.collectionId),
           onFavoriteToggle: () =>
               context.read<LinkProvider>().toggleFavorite(link.id),
-          onDismissConfirm: () => showDialog<bool>(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: Text(t('dialog.deleteTitle')),
-              content: Text(t('dialog.deleteMessage')),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context, false),
-                  child: Text(t('common.cancel')),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.pop(context, true),
-                  child: Text(
-                    t('common.delete'),
-                    style: const TextStyle(color: VoidColors.darkStatusError),
-                  ),
-                ),
-              ],
-            ),
+          onDismissConfirm: () => confirmDelete(
+            context,
+            title: t('dialog.deleteTitle'),
+            message: t('dialog.deleteMessage'),
           ),
           onDismissed: () =>
               context.read<LinkProvider>().deleteLink(link.id),
@@ -103,90 +67,94 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
     final linkProvider = context.watch<LinkProvider>();
-    final favorites = linkProvider.favoriteLinks;
+
+    var favorites = linkProvider.favoriteLinks;
+    if (_query.trim().isNotEmpty) {
+      final q = _query.trim().toLowerCase();
+      favorites = favorites
+          .where((l) =>
+              l.title.toLowerCase().contains(q) ||
+              l.url.toLowerCase().contains(q) ||
+              l.tags.any((tag) => tag.toLowerCase().contains(q)))
+          .toList();
+    }
     final filtered = _showUnreadOnly
         ? favorites.where((l) => !l.isRead).toList()
         : favorites;
+    final isFiltered = _query.trim().isNotEmpty || _showUnreadOnly;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          t('favorites.title'),
-          style: GoogleFonts.outfit(fontWeight: FontWeight.w700),
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+              child: Text(
+                t('favorites.title'),
+                style: AppFonts.display(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w700,
+                  color: c.textPrimary,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _searchController,
+                      onChanged: (val) => setState(() => _query = val),
+                      style: AppFonts.body(fontSize: 14, color: c.textPrimary),
+                      decoration: InputDecoration(
+                        isDense: true,
+                        hintText: t('favorites.searchHint'),
+                        prefixIcon: Icon(CoolIcons.search, size: 20, color: c.textTertiary),
+                        contentPadding:
+                            const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  PillFilterChip(
+                    label: t('home.filterUnread'),
+                    selected: _showUnreadOnly,
+                    onTap: () => setState(() => _showUnreadOnly = !_showUnreadOnly),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () => linkProvider.loadLinks(),
+                child: linkProvider.isLoading && linkProvider.links.isEmpty
+                    ? Center(
+                        child: CircularProgressIndicator(
+                            color: context.colors.accent))
+                    : filtered.isEmpty
+                        ? _buildEmptyState(isFiltered)
+                        : _buildGroupedList(context, filtered),
+              ),
+            ),
+          ],
         ),
-        centerTitle: true,
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ── Filter chips ───────────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
-            child: Row(
-              children: [
-                _FilterChip(
-                  label: t('home.filterAll'),
-                  selected: !_showUnreadOnly,
-                  onTap: () => setState(() => _showUnreadOnly = false),
-                ),
-                const SizedBox(width: 8),
-                _FilterChip(
-                  label: t('home.filterUnread'),
-                  selected: _showUnreadOnly,
-                  onTap: () => setState(() => _showUnreadOnly = true),
-                ),
-              ],
-            ),
-          ),
-          // ── Content ────────────────────────────────────────────────────────
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: () => linkProvider.loadLinks(),
-              child: linkProvider.isLoading
-                  ? const Center(
-                      child: CircularProgressIndicator(
-                          color: VoidColors.darkAccent))
-                  : filtered.isEmpty
-                      ? _buildEmptyState()
-                      : _buildGroupedList(context, filtered),
-            ),
-          ),
-        ],
       ),
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(bool isFiltered) {
     return ListView(
       children: [
         const SizedBox(height: 200),
         Center(
-          child: Column(
-            children: [
-              const Icon(
-                Icons.star_border,
-                size: 64,
-                color: VoidColors.darkTextTertiary,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                t('favorites.emptyTitle'),
-                style: GoogleFonts.outfit(
-                  fontSize: 18,
-                  color: VoidColors.darkTextTertiary,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                t('favorites.emptySubtitle'),
-                textAlign: TextAlign.center,
-                style: GoogleFonts.outfit(
-                  fontSize: 14,
-                  color: VoidColors.darkTextTertiary,
-                ),
-              ),
-            ],
+          child: EmptyStateView(
+            icon: CoolIcons.starOutline,
+            title: isFiltered ? t('search.emptyTitle') : t('favorites.emptyTitle'),
+            subtitle: isFiltered ? '' : t('favorites.emptySubtitle'),
           ),
         ),
       ],
@@ -199,72 +167,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       padding: const EdgeInsets.only(bottom: 96),
       itemCount: items.length,
       itemBuilder: (_, i) => items[i],
-    );
-  }
-}
-
-// ── Filter chip ────────────────────────────────────────────────────────────────
-
-class _FilterChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _FilterChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-        decoration: BoxDecoration(
-          color: selected ? VoidColors.darkAccentMuted : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: selected ? VoidColors.darkAccent : VoidColors.darkBorder,
-          ),
-        ),
-        child: Text(
-          label,
-          style: GoogleFonts.outfit(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: selected
-                ? VoidColors.darkAccent
-                : VoidColors.darkTextSecondary,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ── Group header ───────────────────────────────────────────────────────────────
-
-class _GroupHeader extends StatelessWidget {
-  final String label;
-
-  const _GroupHeader({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-      child: Text(
-        label.toUpperCase(),
-        style: GoogleFonts.outfit(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: VoidColors.darkTextTertiary,
-          letterSpacing: 0.6,
-        ),
-      ),
     );
   }
 }

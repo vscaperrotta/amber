@@ -1,0 +1,14 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "flutter-web",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": [
+        "-lc",
+        "cd /Users/vittorioscaperrotta/Desktop/personale/github/amber/flutter && flutter run -d chrome --web-port=5959"
+      ],
+      "port": 5959
+    }
+  ]
+}

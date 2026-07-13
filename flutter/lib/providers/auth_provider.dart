@@ -39,6 +39,7 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
       return false;
     } catch (e) {
+      debugPrint('[AuthProvider] unexpected auth error: $e');
       _error = t('auth.errorUnexpected');
       _isLoading = false;
       notifyListeners();
@@ -62,6 +63,7 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
       return false;
     } catch (e) {
+      debugPrint('[AuthProvider] unexpected auth error: $e');
       _error = t('auth.errorUnexpected');
       _isLoading = false;
       notifyListeners();

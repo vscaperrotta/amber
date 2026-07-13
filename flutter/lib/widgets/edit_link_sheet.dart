@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../theme/app_fonts.dart';
 import 'package:provider/provider.dart';
 import '../models/link_item.dart';
 import '../providers/link_provider.dart';
 import '../providers/collection_provider.dart';
-import '../theme/void_colors.dart';
+import '../theme/app_colors.dart';
 import '../utils/i18n.dart';
+import 'loading_spinner.dart';
+import '../theme/cool_icons.dart';
 
 /// Bottom sheet to edit a link's title, tags and collection.
 class EditLinkSheet extends StatefulWidget {
@@ -63,6 +65,7 @@ class _EditLinkSheetState extends State<EditLinkSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.colors;
     final collections = context.watch<CollectionProvider>().collections;
 
     return Padding(
@@ -78,10 +81,10 @@ class _EditLinkSheetState extends State<EditLinkSheet> {
         children: [
           Text(
             t('editLink.title'),
-            style: GoogleFonts.outfit(
+            style: AppFonts.body(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: VoidColors.darkTextPrimary,
+              color: c.textPrimary,
             ),
           ),
           const SizedBox(height: 16),
@@ -109,7 +112,7 @@ class _EditLinkSheetState extends State<EditLinkSheet> {
               decoration: InputDecoration(
                 labelText: t('collections.fieldLabel'),
                 border: const OutlineInputBorder(),
-                prefixIcon: const Icon(Icons.folder_outlined, size: 20),
+                prefixIcon: const Icon(CoolIcons.folder, size: 20),
               ),
               items: [
                 DropdownMenuItem(
@@ -127,16 +130,7 @@ class _EditLinkSheetState extends State<EditLinkSheet> {
           const SizedBox(height: 24),
           FilledButton.icon(
             onPressed: _isSaving ? null : _save,
-            icon: _isSaving
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: VoidColors.accentOnPrimary,
-                    ),
-                  )
-                : const Icon(Icons.save),
+            icon: _isSaving ? const LoadingSpinner() : const Icon(CoolIcons.save),
             label: Text(_isSaving ? t('common.saving') : t('editLink.save')),
           ),
         ],

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'theme/app_fonts.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -10,13 +10,18 @@ import 'providers/collection_provider.dart';
 import 'providers/ui_state_provider.dart';
 import 'screens/add_link_screen.dart';
 import 'theme/void_colors.dart';
+import 'theme/app_colors.dart';
 import 'widgets/main_scaffold.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    debugPrint('Firebase init failed: $e');
+  }
   runApp(const AmberApp());
 }
 
@@ -92,7 +97,7 @@ class _AmberAppState extends State<AmberApp> {
         theme: ThemeData(
           useMaterial3: true,
           brightness: Brightness.light,
-          fontFamily: GoogleFonts.outfit().fontFamily,
+          fontFamily: AppFonts.body().fontFamily,
           scaffoldBackgroundColor: VoidColors.lightBgPrimary,
           colorScheme: const ColorScheme.light(
             primary: VoidColors.lightAccent,
@@ -111,7 +116,7 @@ class _AmberAppState extends State<AmberApp> {
             foregroundColor: VoidColors.lightTextPrimary,
             elevation: 0,
             centerTitle: true,
-            titleTextStyle: GoogleFonts.outfit(
+            titleTextStyle: AppFonts.body(
               fontSize: 17,
               fontWeight: FontWeight.w700,
               color: VoidColors.lightTextPrimary,
@@ -144,19 +149,20 @@ class _AmberAppState extends State<AmberApp> {
           chipTheme: ChipThemeData(
             backgroundColor: VoidColors.lightBgElevated,
             side: const BorderSide(color: VoidColors.lightBorder),
-            labelStyle: GoogleFonts.outfit(
+            labelStyle: AppFonts.body(
               fontSize: 10,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
               color: VoidColors.lightTextSecondary,
               letterSpacing: 0.5,
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+            labelPadding: const EdgeInsets.symmetric(horizontal: 2),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             shape: const StadiumBorder(),
           ),
           inputDecorationTheme: InputDecorationTheme(
             filled: true,
             fillColor: VoidColors.lightBgElevated,
-            hintStyle: GoogleFonts.outfit(
+            hintStyle: AppFonts.body(
               color: VoidColors.lightTextTertiary,
               fontSize: 14,
             ),
@@ -176,7 +182,7 @@ class _AmberAppState extends State<AmberApp> {
               ),
             ),
             contentPadding: const EdgeInsets.symmetric(
-              horizontal: 14,
+              horizontal: 18,
               vertical: 12,
             ),
           ),
@@ -185,12 +191,11 @@ class _AmberAppState extends State<AmberApp> {
             thickness: 1,
           ),
           listTileTheme: const ListTileThemeData(
-            tileColor: Colors.transparent,
             contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           ),
           snackBarTheme: SnackBarThemeData(
             backgroundColor: VoidColors.lightBgElevated,
-            contentTextStyle: GoogleFonts.outfit(
+            contentTextStyle: AppFonts.body(
               color: VoidColors.lightTextPrimary,
             ),
             shape: RoundedRectangleBorder(
@@ -201,14 +206,14 @@ class _AmberAppState extends State<AmberApp> {
           textButtonTheme: TextButtonThemeData(
             style: TextButton.styleFrom(
               foregroundColor: VoidColors.lightAccent,
-              textStyle: GoogleFonts.outfit(fontWeight: FontWeight.w600),
+              textStyle: AppFonts.body(fontWeight: FontWeight.w600),
             ),
           ),
           filledButtonTheme: FilledButtonThemeData(
             style: FilledButton.styleFrom(
               backgroundColor: VoidColors.lightAccent,
               foregroundColor: VoidColors.accentOnPrimary,
-              textStyle: GoogleFonts.outfit(
+              textStyle: AppFonts.body(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
               ),
@@ -221,12 +226,13 @@ class _AmberAppState extends State<AmberApp> {
           progressIndicatorTheme: const ProgressIndicatorThemeData(
             color: VoidColors.lightAccent,
           ),
+          extensions: const [AppColors.light],
         ),
         // ── Dark theme ─────────────────────────────────────────────────────────
         darkTheme: ThemeData(
           useMaterial3: true,
           brightness: Brightness.dark,
-          fontFamily: GoogleFonts.outfit().fontFamily,
+          fontFamily: AppFonts.body().fontFamily,
           scaffoldBackgroundColor: VoidColors.darkBgPrimary,
           colorScheme: const ColorScheme.dark(
             primary: VoidColors.darkAccent,
@@ -245,7 +251,7 @@ class _AmberAppState extends State<AmberApp> {
             foregroundColor: VoidColors.darkTextPrimary,
             elevation: 0,
             centerTitle: true,
-            titleTextStyle: GoogleFonts.outfit(
+            titleTextStyle: AppFonts.body(
               fontSize: 17,
               fontWeight: FontWeight.w700,
               color: VoidColors.darkTextPrimary,
@@ -278,19 +284,20 @@ class _AmberAppState extends State<AmberApp> {
           chipTheme: ChipThemeData(
             backgroundColor: VoidColors.darkBgElevated,
             side: const BorderSide(color: VoidColors.darkBorder),
-            labelStyle: GoogleFonts.outfit(
+            labelStyle: AppFonts.body(
               fontSize: 10,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
               color: VoidColors.darkTextSecondary,
               letterSpacing: 0.5,
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+            labelPadding: const EdgeInsets.symmetric(horizontal: 2),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             shape: const StadiumBorder(),
           ),
           inputDecorationTheme: InputDecorationTheme(
             filled: true,
             fillColor: VoidColors.darkBgElevated,
-            hintStyle: GoogleFonts.outfit(
+            hintStyle: AppFonts.body(
               color: VoidColors.darkTextSecondary,
               fontSize: 14,
             ),
@@ -310,7 +317,7 @@ class _AmberAppState extends State<AmberApp> {
               ),
             ),
             contentPadding: const EdgeInsets.symmetric(
-              horizontal: 14,
+              horizontal: 18,
               vertical: 12,
             ),
           ),
@@ -319,12 +326,11 @@ class _AmberAppState extends State<AmberApp> {
             thickness: 1,
           ),
           listTileTheme: const ListTileThemeData(
-            tileColor: Colors.transparent,
             contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           ),
           snackBarTheme: SnackBarThemeData(
             backgroundColor: VoidColors.darkBgElevated,
-            contentTextStyle: GoogleFonts.outfit(
+            contentTextStyle: AppFonts.body(
               color: VoidColors.darkTextPrimary,
             ),
             shape: RoundedRectangleBorder(
@@ -335,14 +341,14 @@ class _AmberAppState extends State<AmberApp> {
           textButtonTheme: TextButtonThemeData(
             style: TextButton.styleFrom(
               foregroundColor: VoidColors.darkAccent,
-              textStyle: GoogleFonts.outfit(fontWeight: FontWeight.w600),
+              textStyle: AppFonts.body(fontWeight: FontWeight.w600),
             ),
           ),
           filledButtonTheme: FilledButtonThemeData(
             style: FilledButton.styleFrom(
               backgroundColor: VoidColors.darkAccent,
               foregroundColor: VoidColors.accentOnPrimary,
-              textStyle: GoogleFonts.outfit(
+              textStyle: AppFonts.body(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
               ),
@@ -355,6 +361,7 @@ class _AmberAppState extends State<AmberApp> {
           progressIndicatorTheme: const ProgressIndicatorThemeData(
             color: VoidColors.darkAccent,
           ),
+          extensions: const [AppColors.dark],
         ),
         themeMode: ThemeMode.system,
         home: const MainScaffold(),
