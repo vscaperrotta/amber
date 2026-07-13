@@ -216,6 +216,14 @@ const translations = {
 		'sidepanel.searchPlaceholder': 'Search…',
 		'sidepanel.openFullView': 'Open Amber →',
 		'sidepanel.openSidePanel': 'Open side panel',
+		'sidepanel.allCollections': 'All',
+		'sidepanel.uncategorized': 'Unfiled',
+		'sidepanel.newFolder': 'New folder',
+		'sidepanel.folderPlaceholder': 'Folder name',
+		'sidepanel.clearFilters': 'Clear',
+		'sidepanel.assignFolder': 'Move to folder',
+		'sidepanel.editTags': 'Edit tags',
+		'sidepanel.done': 'Done',
 
 		// ── SaveOverlay (content script) ──────────────────────
 		'overlay.saving': 'Saving...',
@@ -442,6 +450,14 @@ const translations = {
 		'sidepanel.searchPlaceholder': 'Cerca…',
 		'sidepanel.openFullView': 'Apri Amber →',
 		'sidepanel.openSidePanel': 'Apri pannello laterale',
+		'sidepanel.allCollections': 'Tutte',
+		'sidepanel.uncategorized': 'Senza cartella',
+		'sidepanel.newFolder': 'Nuova cartella',
+		'sidepanel.folderPlaceholder': 'Nome cartella',
+		'sidepanel.clearFilters': 'Azzera',
+		'sidepanel.assignFolder': 'Sposta nella cartella',
+		'sidepanel.editTags': 'Modifica tag',
+		'sidepanel.done': 'Fatto',
 
 		// ── SaveOverlay (content script) ──────────────────────
 		'overlay.saving': 'Salvataggio in corso...',

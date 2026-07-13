@@ -6,7 +6,6 @@ import {
 	GoogleAuthProvider,
 } from '@firebase/auth';
 import { LayoutGrid, List, Download, Upload } from 'lucide-react';
-import Toggle from '@components/Toggle';
 import Browser from 'webextension-polyfill';
 import { APP_NAME, APP_VERSION } from '../common/constants.js';
 import '@styles/main.scss';
@@ -288,16 +287,6 @@ export default function App() {
 							{t('homeView.listView')}
 						</button>
 					</div>
-				</div>
-				<div className="options__pref-row">
-					<div className="options__pref-label">
-						<span>{t('options.newtabEnabled')}</span>
-						<span className="options__pref-desc">{t('options.newtabEnabledDesc')}</span>
-					</div>
-					<Toggle
-						checked={settings.newtabEnabled}
-						onChange={(checked) => updateSettings({ newtabEnabled: checked })}
-					/>
 				</div>
 			</section>
 

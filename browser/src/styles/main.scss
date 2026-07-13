@@ -13,8 +13,23 @@
 // import components here...
 @use './components/tag-editor';
 
-// Font import (must be after @use rules)
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Geist+Mono:wght@400;700&display=swap');
+// Locally bundled fonts — shared with the Flutter app (Mulish body, Baloo2 display).
+// No network fetch; served from the extension package.
+@font-face {
+	font-family: 'Mulish';
+	font-style: normal;
+	font-weight: 200 1000;
+	font-display: swap;
+	src: url('/assets/fonts/Mulish.ttf') format('truetype');
+}
+
+@font-face {
+	font-family: 'Baloo2';
+	font-style: normal;
+	font-weight: 400 800;
+	font-display: swap;
+	src: url('/assets/fonts/Baloo2.ttf') format('truetype');
+}
 
 body {
 	font-family: var(--font-display);

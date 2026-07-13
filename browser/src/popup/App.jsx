@@ -1,18 +1,20 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Settings, Trash2, Plus, Search, Bookmark, Pin, PanelRight, Folder } from 'lucide-react';
-import Browser from 'webextension-polyfill';
 import { APP_NAME } from '../common/constants.js';
 import { useLinks } from '@utils/useLinks';
 import { useCollections } from '@utils/useCollections';
 import { useAuth } from '@contexts/AuthContext.jsx';
 import { useUserSettings } from '@utils/useUserSettings';
 import { getCurrentTab } from '@utils/tabs';
+import { extractDomain } from '@utils/domain';
 import { goToSettings } from '@utils/globalMethods.js';
 import Button from '@components/Button';
 import IconButton from '@components/IconButton';
 import Input from '@components/Input';
 import { SkeletonLinkRow } from '@components/Skeleton';
 import EmptyState from '@components/EmptyState';
+import LinkThumbnail from '@components/LinkThumbnail';
+import CollectionBadge from '@components/CollectionBadge';
 import TagEditor from '@newtab/components/TagEditor.jsx';
 import { MAX_POPUP_LINKS } from '../common/constants.js';
 import { t } from '@utils/i18n';
@@ -76,6 +78,12 @@ export default function App() {
 		links.forEach((l) => l.metadata?.tags?.forEach((tag) => set.add(tag)));
 		return Array.from(set);
 	}, [links]);
+
+	const collectionsById = useMemo(() => {
+		const map = {};
+		collections.forEach((col) => { map[col.id] = col; });
+		return map;
+	}, [collections]);
 
 	async function handleSaveCurrentTab() {
 		setSaving(true);
@@ -141,10 +149,6 @@ export default function App() {
 		updateLink(link.id, { metadata: { ...link.metadata, tags: newTags } });
 	}
 
-	function handleOpenNewTab() {
-		Browser.tabs.create({});
-	}
-
 	function handleOpenSidePanel() {
 		if (!chrome?.sidePanel?.open) return;
 		chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
@@ -201,8 +205,13 @@ export default function App() {
 				</div>
 
 				{collections.length > 0 && (
-					<div className="popup__collection-row">
-						<Folder size={12} className="popup__collection-icon" />
+					<div
+						className="popup__collection-row"
+						style={collectionsById[selectedCollectionId] ? { '--row-color': collectionsById[selectedCollectionId].color } : undefined}
+					>
+						{collectionsById[selectedCollectionId]
+							? <span className="popup__collection-dot" aria-hidden="true" />
+							: <Folder size={12} className="popup__collection-icon" />}
 						<select
 							className="popup__collection-select"
 							value={selectedCollectionId}
@@ -276,32 +285,29 @@ export default function App() {
 						) : (
 							<ul className="popup__links">
 								{filteredLinks.map((link) => {
+									const col = link.metadata?.collectionId ? collectionsById[link.metadata.collectionId] : null;
 									return (
 										<li
 											key={link.id}
 											className="popup__link-item popup__link-item--with-tags"
 										>
 											<div className="popup__link-main">
-												{link.metadata?.favicon ? (
-													<img
-														src={link.metadata.favicon}
-														className="popup__link-favicon"
-														width={14}
-														height={14}
-														alt=""
-													/>
-												) : (
-													<div className="popup__link-favicon-placeholder" />
-												)}
-												<a
-													href={link.url}
-													className="popup__link-title"
-													target="_blank"
-													rel="noopener noreferrer"
-													title={link.url}
-												>
-													{link.title || link.url}
-												</a>
+												<LinkThumbnail link={link} size="sm" />
+												<div className="popup__link-body">
+													<a
+														href={link.url}
+														className="popup__link-title"
+														target="_blank"
+														rel="noopener noreferrer"
+														title={link.url}
+													>
+														{link.title || link.url}
+													</a>
+													<div className="popup__link-meta">
+														<span className="popup__link-domain">{extractDomain(link.url)}</span>
+														{col && <CollectionBadge name={col.name} color={col.color} />}
+													</div>
+												</div>
 												<IconButton
 													icon={<Trash2 size={14} />}
 													onClick={() => deleteLink(link.id)}
@@ -318,7 +324,10 @@ export default function App() {
 												/>
 											</div>
 											{collections.length > 0 && (
-												<div className="popup__link-collection">
+												<div
+													className="popup__link-collection"
+													style={col ? { '--row-color': col.color } : undefined}
+												>
 													<Folder size={10} className="popup__link-collection-icon" />
 													<select
 														className="popup__link-collection-select"
@@ -340,16 +349,6 @@ export default function App() {
 					</>
 				)}
 			</div>
-
-			<footer className="popup__footer">
-				<button
-					className="popup__footer-link"
-					onClick={handleOpenNewTab}
-					type="button"
-				>
-					{t('popup.openFullView')}
-				</button>
-			</footer>
 		</div>
 	);
 }

@@ -239,21 +239,24 @@ class _FilterSheetContentState extends State<_FilterSheetContent> {
                       ],
                     ),
                   ),
+                  const SizedBox(height: 8),
                   SizedBox(
-                    height: 40,
+                    height: 44,
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
                       itemCount: visibleTags.length,
                       separatorBuilder: (_, __) => const SizedBox(width: 8),
                       itemBuilder: (_, i) {
                         final tag = visibleTags[i];
-                        return _TagChip(
-                          tag: tag,
-                          selected: _tags.contains(tag),
-                          onTap: () => setState(() {
-                            if (!_tags.add(tag)) _tags.remove(tag);
-                          }),
+                        return Center(
+                          child: _TagChip(
+                            tag: tag,
+                            selected: _tags.contains(tag),
+                            onTap: () => setState(() {
+                              if (!_tags.add(tag)) _tags.remove(tag);
+                            }),
+                          ),
                         );
                       },
                     ),

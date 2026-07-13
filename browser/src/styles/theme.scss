@@ -1,7 +1,8 @@
 // ── Structural tokens (theme-independent) ────────────────────────────────────
 :root {
-	--font-display: 'Outfit', system-ui, sans-serif;
-	--font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
+	--font-display: 'Mulish', system-ui, sans-serif;          // body / UI (Flutter body)
+	--font-heading: 'Baloo2', 'Mulish', system-ui, sans-serif; // display headings (Flutter Baloo2)
+	--font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
 	--radius-sm: 0.375rem;
 	--radius-md: 0.625rem;

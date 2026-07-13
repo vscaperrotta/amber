@@ -89,7 +89,8 @@ export function SaveOverlay() {
 	return (
 		<div style={{
 			all: 'initial',
-			fontFamily: "'Outfit', system-ui, sans-serif",
+			// ponytail: injected toast — Mulish if the page has it, else system-ui; not worth web_accessible_resources to force-load the ttf in-page
+			fontFamily: "'Mulish', system-ui, sans-serif",
 			position: 'fixed',
 			bottom: '24px',
 			right: '24px',

@@ -52,9 +52,10 @@ export async function getManifest() {
         type: 'module',
       }
     ],
-    chrome_url_overrides: {
-      newtab: 'src/newtab/index.html'
-    },
+    // newtab override removed — new tab reverts to browser default
+    // chrome_url_overrides: {
+    //   newtab: 'src/newtab/index.html'
+    // },
     options_ui: {
       page: "src/options/index.html",
       open_in_tab: true

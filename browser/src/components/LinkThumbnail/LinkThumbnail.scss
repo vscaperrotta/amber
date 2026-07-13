@@ -1,0 +1,82 @@
+.link-thumb {
+	background: var(--bg-elevated);
+	border-radius: var(--radius-sm);
+	flex-shrink: 0;
+	overflow: hidden;
+	position: relative;
+
+	// Sizes ─────────────────────────────────────────────
+	&--sm {
+		height: 2.25rem;
+		width: 2.25rem;
+	}
+
+	&--md {
+		height: 2.75rem;
+		width: 2.75rem;
+	}
+
+	&--lg {
+		aspect-ratio: 16 / 9;
+		height: auto;
+		width: 100%;
+	}
+}
+
+.link-thumb__img {
+	display: block;
+	height: 100%;
+	object-fit: cover;
+	width: 100%;
+}
+
+// Favicon badge overlaid on the preview corner
+.link-thumb__favicon {
+	background: var(--bg-surface);
+	border-radius: 4px;
+	bottom: 2px;
+	box-shadow: var(--shadow-sm);
+	left: 2px;
+	object-fit: contain;
+	padding: 1px;
+	position: absolute;
+}
+
+.link-thumb--sm .link-thumb__favicon {
+	display: none; // too small to read on sm rows
+}
+
+// ── Fallback monogram block ──────────────────────────
+.link-thumb--fallback {
+	align-items: center;
+	background:
+		linear-gradient(
+			135deg,
+			hsl(var(--thumb-hue) 55% 52% / 0.9),
+			hsl(calc(var(--thumb-hue) + 40) 60% 42% / 0.9)
+		);
+	display: flex;
+	justify-content: center;
+}
+
+.link-thumb__monogram {
+	color: #fff;
+	font-family: var(--font-display);
+	font-size: 1rem;
+	font-weight: 700;
+	line-height: 1;
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+.link-thumb--sm .link-thumb__monogram {
+	font-size: 0.8125rem;
+}
+
+.link-thumb--lg .link-thumb__monogram {
+	font-size: 2rem;
+}
+
+.link-thumb__fallback-favicon {
+	filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+	object-fit: contain;
+}

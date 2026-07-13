@@ -1,7 +1,7 @@
 import { doc, setDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../common/firebase.js';
 
-const DEFAULT_SETTINGS = { newtabEnabled: true, defaultViewMode: 'grid', headerLinks: [], popupTagMode: 'off', showDescription: true };
+const DEFAULT_SETTINGS = { defaultViewMode: 'grid', headerLinks: [], popupTagMode: 'off', showDescription: true };
 
 export function updateUserSettings(uid, settings) {
 	return setDoc(doc(db, 'users', uid, 'settings', 'preferences'), settings, { merge: true });

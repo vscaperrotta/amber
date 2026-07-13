@@ -131,7 +131,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             Expanded(
               child: RefreshIndicator(
                 onRefresh: () => linkProvider.loadLinks(),
-                child: linkProvider.isLoading
+                child: linkProvider.isLoading && linkProvider.links.isEmpty
                     ? Center(
                         child: CircularProgressIndicator(
                             color: context.colors.accent))
