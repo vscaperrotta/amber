@@ -309,4 +309,4 @@ amber-link-manager/
 
 ## License
 
-[MIT](./LICENSE.md)
+[AGPL-3.0 license](./LICENSE.md)
