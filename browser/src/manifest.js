@@ -28,28 +28,28 @@ export async function getManifest() {
       'storage',
       'tabs',
       'activeTab',
+      'scripting',
       'cookies',
       'sidePanel',
     ],
     side_panel: {
       default_path: 'src/sidepanel/index.html',
     },
-    host_permissions: [
-      "<all_urls>"
-    ],
     background: {
       "service_worker": "assets/background.js",
       "type": "module"
     },
-    content_scripts: [
+    web_accessible_resources: [
       {
-        matches: [
-          "<all_urls>"
+        resources: [
+          "assets/content.js",
+          "assets/actions.js",
+          "assets/i18n.js"
         ],
-        match_origin_as_fallback: true,
-        run_at: 'document_idle',
-        js: ['assets/content.js'],
-        type: 'module',
+        matches: [
+          "http://*/*",
+          "https://*/*"
+        ]
       }
     ],
     // newtab override removed — new tab reverts to browser default

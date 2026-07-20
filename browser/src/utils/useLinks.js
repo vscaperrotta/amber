@@ -17,6 +17,7 @@ import {
 } from './firebaseDb.js';
 import { getCurrentTab, isInternalUrl } from './tabs.js';
 import { normalizeUrl } from './normalizeUrl.js';
+import { ensureContentScript } from './contentScriptAccess.js';
 import { FETCH_METADATA, METADATA_ENRICHED, GET_METADATA } from '../common/actions.js';
 
 export function useLinks() {
@@ -98,11 +99,13 @@ export function useLinks() {
 
     // Recupera metadata dal content script della tab (best-effort)
     let metadata;
-    try {
-      metadata = await Browser.tabs.sendMessage(tab.id, { action: GET_METADATA });
-      console.log('[saveCurrentTab] metadata from content script:', metadata);
-    } catch (err) {
-      console.warn('[saveCurrentTab] content script unavailable:', err?.message);
+    if (await ensureContentScript(tab)) {
+      try {
+        metadata = await Browser.tabs.sendMessage(tab.id, { action: GET_METADATA });
+        console.log('[saveCurrentTab] metadata from content script:', metadata);
+      } catch (err) {
+        console.warn('[saveCurrentTab] content script unavailable:', err?.message);
+      }
     }
 
     const entry = {

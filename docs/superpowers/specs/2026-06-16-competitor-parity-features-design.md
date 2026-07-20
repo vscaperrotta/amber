@@ -125,4 +125,4 @@ Items 1–6 need no new infrastructure — they extend existing Firestore docume
 
 ## Testing approach
 
-Per-feature: code review + `npm run build` + `npm run lint` clean, consistent with how every other feature this session was verified. Live in-browser verification where feasible via the real installed extension (screenshot-only, per the architectural limits already hit this session — Claude-in-Chrome can't access other extensions' pages, computer-use grants browsers read-only). No automated test runner exists in this repo (per `browser/CLAUDE.md`); none is being introduced for this batch.
+Per-feature: code review + `npm run build` + `npm run lint` clean, consistent with how every other feature this session was verified. Live in-browser verification where feasible via the real installed extension (screenshot-only, per the architectural limits already hit this session — AGENTS.md-in-Chrome can't access other extensions' pages, computer-use grants browsers read-only). No automated test runner exists in this repo (per `browser/AGENTS.md.md`); none is being introduced for this batch.
