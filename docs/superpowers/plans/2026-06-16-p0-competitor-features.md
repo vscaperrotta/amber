@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 >
-> **Verification note:** `browser/CLAUDE.md` states no test runner is configured in this repo. Every "Verify" step below is `npm run lint` + `npm run build` (must stay clean) plus a manual trace/check — this replaces the skill's default "write failing test, watch it fail, make it pass" loop, per the project's actual testing convention (already used for every prior feature this session).
+> **Verification note:** `browser/AGENTS.md.md` states no test runner is configured in this repo. Every "Verify" step below is `npm run lint` + `npm run build` (must stay clean) plus a manual trace/check — this replaces the skill's default "write failing test, watch it fail, make it pass" loop, per the project's actual testing convention (already used for every prior feature this session).
 
 **Goal:** Ship the 4 P0 features from `docs/superpowers/specs/2026-06-16-competitor-parity-features-design.md`: duplicate detection, wider full-text search, bulk bookmark import, keyboard shortcuts.
 
@@ -492,7 +492,7 @@ npm run build
 ```
 Expected: clean (no new errors).
 
-Manual check: open the real installed extension's newtab page (per this session's established method — screenshot via the granted Microsoft Edge read-tier access, since Claude-in-Chrome can't reach another extension's pages). Type a tag name or a bare domain fragment (e.g. `youtube`) into the search box that does **not** appear in any saved title/URL/description, confirm matching cards now show up.
+Manual check: open the real installed extension's newtab page (per this session's established method — screenshot via the granted Microsoft Edge read-tier access, since AI-in-Chrome can't reach another extension's pages). Type a tag name or a bare domain fragment (e.g. `youtube`) into the search box that does **not** appear in any saved title/URL/description, confirm matching cards now show up.
 
 - [ ] **Step 4: Commit (HELD)**
 ```bash

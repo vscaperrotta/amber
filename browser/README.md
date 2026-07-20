@@ -50,5 +50,5 @@ Firebase Auth (email/password + Google) + Firestore for cloud sync, falling back
 
 ## Docs
 
-- [CLAUDE.md](./CLAUDE.md) — conventions, component structure, reference architecture
+- [AGENTS.md](./AGENTS.md) — conventions, component structure, reference architecture
 - [MAP.md](./MAP.md) — full source tree and data flow diagrams
