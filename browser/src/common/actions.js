@@ -28,5 +28,7 @@ export const METADATA_ENRICHED = 'METADATA_ENRICHED'
 // ── Metadata extraction ──────────────────────────────────────────────────────
 /** Popup/background → content script: estrai metadata dal DOM live della tab */
 export const GET_METADATA = 'GET_METADATA'
+/** Popup/background → content script: verifica se il content script è già attivo */
+export const CONTENT_SCRIPT_PING = 'CONTENT_SCRIPT_PING'
 /** Background interno: fetch remoto fallback per arricchire metadata */
 export const FETCH_METADATA = 'FETCH_METADATA'

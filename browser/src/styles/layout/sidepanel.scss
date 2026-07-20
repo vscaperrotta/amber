@@ -511,12 +511,23 @@ body {
 	background: transparent;
 	border: none;
 	color: var(--text-primary);
+	color-scheme: dark;
 	cursor: pointer;
 	flex: 1;
 	font-family: inherit;
 	font-size: 0.8125rem;
 	height: 2rem;
 	outline: none;
+
+	option {
+		background: var(--bg-elevated);
+		color: var(--text-primary);
+	}
+
+	option:checked {
+		background: var(--bg-surface);
+		color: var(--text-primary);
+	}
 }
 
 .sp__edit-done {

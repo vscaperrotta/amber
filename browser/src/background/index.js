@@ -6,6 +6,7 @@ import { addLink as dbAddLink, updateLink as dbUpdateLink, patchLinkMetadata as 
 import { addLink as fbAddLink, updateLink as fbUpdateLink, patchLinkMetadata as fbPatchMeta, getAllLinksOnce as fbGetAllLinksOnce } from '../utils/firebaseDb.js';
 import { uploadThumbnail } from '../utils/firebaseStorage.js';
 import { normalizeUrl } from '../utils/normalizeUrl.js';
+import { ensureContentScript } from '../utils/contentScriptAccess.js';
 import {
 	SAVE_LINK_LOADING,
 	SAVE_LINK_SUCCESS,
@@ -53,22 +54,27 @@ async function saveTab(tab, uidOverride) {
 	const { id: tabId, url, title } = tab;
 	console.log('[saveTab] start — tabId:', tabId, 'url:', url, 'uidOverride:', uidOverride);
 
+	const contentScriptReady = await ensureContentScript(tab);
 
 	// 1. Notifica il content script: mostra overlay "Salvataggio..."
-	try {
-		await Browser.tabs.sendMessage(tabId, { action: SAVE_LINK_LOADING });
-		console.log('[saveTab] SAVE_LINK_LOADING sent');
-	} catch (err) {
-		console.warn('[saveTab] SAVE_LINK_LOADING failed (tab not injectable):', err?.message);
+	if (contentScriptReady) {
+		try {
+			await Browser.tabs.sendMessage(tabId, { action: SAVE_LINK_LOADING });
+			console.log('[saveTab] SAVE_LINK_LOADING sent');
+		} catch (err) {
+			console.warn('[saveTab] SAVE_LINK_LOADING failed (tab not injectable):', err?.message);
+		}
 	}
 
 	// 2. Ottieni metadata dal content script (DOM live — fonte migliore)
 	let metadata;
-	try {
-		metadata = await Browser.tabs.sendMessage(tabId, { action: GET_METADATA });
-		console.log('[saveTab] GET_METADATA result:', metadata);
-	} catch (err) {
-		console.warn('[saveTab] GET_METADATA failed (content script unavailable):', err?.message);
+	if (contentScriptReady) {
+		try {
+			metadata = await Browser.tabs.sendMessage(tabId, { action: GET_METADATA });
+			console.log('[saveTab] GET_METADATA result:', metadata);
+		} catch (err) {
+			console.warn('[saveTab] GET_METADATA failed (content script unavailable):', err?.message);
+		}
 	}
 
 	// 3. Risolve canonical URL se same-origin
