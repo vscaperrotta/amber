@@ -36,5 +36,5 @@ npm run build    # production build
 
 ## Docs
 
-- [CLAUDE.md](./CLAUDE.md) — conventions and architecture notes
+- [AGENTS.md](./AGENTS.md) — conventions and architecture notes
 - [MAP.md](./MAP.md) — full source tree

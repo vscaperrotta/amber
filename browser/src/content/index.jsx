@@ -2,13 +2,15 @@ import Browser from 'webextension-polyfill';
 import { createRoot } from 'react-dom/client';
 import { extractMetadata } from '../utils/extractMetadata.js';
 import { extractBodyText } from '../utils/extractBodyText.js';
-import { SAVE_LINK_LOADING, GET_METADATA } from '../common/actions.js';
+import { SAVE_LINK_LOADING, GET_METADATA, CONTENT_SCRIPT_PING } from '../common/actions.js';
 import { SaveOverlay } from './SaveOverlay.jsx';
 
-console.log('[content] script loaded — url:', location.href);
-
-Browser.runtime.onMessage.addListener((msg) => {
+function handleMessage(msg) {
 	console.log('[content] message received:', msg.action, msg.payload);
+
+	if (msg.action === CONTENT_SCRIPT_PING) {
+		return Promise.resolve({ ok: true });
+	}
 
 	// Risponde con i metadata estratti dal DOM live
 	if (msg.action === GET_METADATA) {
@@ -27,7 +29,15 @@ Browser.runtime.onMessage.addListener((msg) => {
 
 	console.warn('[content] unhandled message action:', msg.action);
 	return false;
-});
+}
+
+if (!globalThis.__AMBER_CONTENT_SCRIPT_READY__) {
+	globalThis.__AMBER_CONTENT_SCRIPT_READY__ = true;
+	console.log('[content] script loaded — url:', location.href);
+	Browser.runtime.onMessage.addListener(handleMessage);
+} else {
+	console.log('[content] script already active — url:', location.href);
+}
 
 function injectSaveOverlay() {
 	if (document.getElementById('amber-overlay-root')) {

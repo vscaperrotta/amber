@@ -183,6 +183,36 @@ export default function App() {
 			{/* ── Collection filter + create ───────────────────── */}
 			<div className="sp__filters">
 				<div className="sp__chip-row" role="tablist" aria-label={t('sidepanel.allCollections')}>
+
+					{creatingFolder ? (
+						<span className="sp__folder-create">
+							<input
+								className="sp__folder-input"
+								type="text"
+								autoFocus
+								placeholder={t('sidepanel.folderPlaceholder')}
+								value={newFolderName}
+								onChange={(e) => setNewFolderName(e.target.value)}
+								onKeyDown={(e) => {
+									if (e.key === 'Enter') handleCreateFolder();
+									if (e.key === 'Escape') { setCreatingFolder(false); setNewFolderName(''); }
+								}}
+							/>
+							<button type="button" className="sp__folder-confirm" onClick={handleCreateFolder} aria-label={t('common.confirm')}>
+								<Check size={13} />
+							</button>
+						</span>
+					) : (
+						<button
+							type="button"
+							className="sp__chip sp__chip--add"
+							onClick={() => setCreatingFolder(true)}
+							title={t('sidepanel.newFolder')}
+						>
+							<FolderPlus size={13} />
+						</button>
+					)}
+
 					<button
 						type="button"
 						role="tab"
@@ -223,34 +253,6 @@ export default function App() {
 						</button>
 					)}
 
-					{creatingFolder ? (
-						<span className="sp__folder-create">
-							<input
-								className="sp__folder-input"
-								type="text"
-								autoFocus
-								placeholder={t('sidepanel.folderPlaceholder')}
-								value={newFolderName}
-								onChange={(e) => setNewFolderName(e.target.value)}
-								onKeyDown={(e) => {
-									if (e.key === 'Enter') handleCreateFolder();
-									if (e.key === 'Escape') { setCreatingFolder(false); setNewFolderName(''); }
-								}}
-							/>
-							<button type="button" className="sp__folder-confirm" onClick={handleCreateFolder} aria-label={t('common.confirm')}>
-								<Check size={13} />
-							</button>
-						</span>
-					) : (
-						<button
-							type="button"
-							className="sp__chip sp__chip--add"
-							onClick={() => setCreatingFolder(true)}
-							title={t('sidepanel.newFolder')}
-						>
-							<FolderPlus size={13} />
-						</button>
-					)}
 				</div>
 
 				{allTags.length > 0 && (

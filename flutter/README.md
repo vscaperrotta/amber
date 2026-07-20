@@ -37,5 +37,5 @@ flutter analyze                                          # lint
 
 ## Docs
 
-- [CLAUDE.md](./CLAUDE.md) — conventions and architecture notes
+- [AGENTS.md.md](./AGENTS.md.md) — conventions and architecture notes
 - [MAP.md](./MAP.md) — full source tree
