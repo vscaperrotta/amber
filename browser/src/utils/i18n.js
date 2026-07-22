@@ -22,8 +22,6 @@ const translations = {
 		'popup.errorUrlInvalid': 'Invalid URL. Must start with https://',
 		'popup.searchPlaceholder': 'Search saved links...',
 		'popup.openFullView': 'Open full library →',
-		'popup.addToHeaderLinks': 'Add to link bar',
-		'popup.removeFromHeaderLinks': 'Remove from link bar',
 
 		// ── HomeView ──────────────────────────────────────────
 		'homeView.linksCount': ({ count }) => `${count} link${count === 1 ? '' : 's'} saved`,
@@ -131,7 +129,6 @@ const translations = {
 
 		// ── Pill ──────────────────────────────────────────────
 		'pill.removeAriaLabel': ({ label }) => `Remove tag ${label}`,
-		'options.headerLinkRemove': ({ label }) => `Remove ${label}`,
 
 		// ── LinkItem ──────────────────────────────────────────
 		'linkItem.favorite': 'Add to favorites',
@@ -167,32 +164,13 @@ const translations = {
 		'options.footer.caption': 'Link saver for Chrome.',
 		'options.privacySection': 'Privacy Policy',
 		'options.privacyOpen': 'Read Privacy Policy',
-		'options.preferencesSection': 'Preferences',
-		'options.defaultView': 'Default view',
-		'options.defaultViewDesc': 'Layout shown when you open a new tab.',
-		'options.showDescription': 'Show description',
-		'options.showDescriptionDesc': 'Display the AI-generated (or page) description under each saved link.',
-		'options.newtabEnabled': 'Full new tab screen',
-		'options.newtabEnabledDesc': 'When on, opening a new tab shows the full Amber app. When off, only the sidebar (links, folders, tags, favorites) is shown.',
-		'options.headerLinksSection': 'Header Links',
-		'options.headerLinksDesc': 'Quick-access links shown in the header.',
-		'options.headerLinkLabel': 'Label',
-		'options.headerLinkUrl': 'URL',
-		'options.headerLinkAdd': 'Add',
-		'options.headerLinkEmpty': 'No links added yet.',
-		'options.headerLinkInvalidUrl': 'Enter a valid URL (https://...)',
+		'options.privacyDesc': 'Opens the always up-to-date policy on GitHub.',
 		'options.collectionSection': 'Your Collection',
 		'options.statLinks': 'links saved',
 		'options.statFavorites': 'favorites',
 		'options.exportLinks': 'Export links',
 		'options.exportDesc': 'Download all saved links as JSON.',
 		'options.exportBtn': 'Export JSON',
-		'options.importSection': 'Import bookmarks',
-		'options.importDesc': 'Import from a browser bookmarks export (HTML file).',
-		'options.importBtn': 'Choose file',
-		'options.importProgress': 'Importing… {done}/{total}',
-		'options.importDone': 'Done — {count} imported, {skipped} duplicates skipped',
-		'options.importError': "Couldn't read that file. Make sure it's a bookmarks HTML export.",
 
 		// ── Empty states ─────────────────────────────────────
 		'emptyState.noLinks.title': 'Save your first link',
@@ -266,8 +244,6 @@ const translations = {
 		'popup.errorUrlInvalid': 'URL non valido. Inizia con https://',
 		'popup.searchPlaceholder': 'Cerca nei link salvati...',
 		'popup.openFullView': 'Apri libreria completa →',
-		'popup.addToHeaderLinks': 'Aggiungi alla barra link',
-		'popup.removeFromHeaderLinks': 'Rimuovi dalla barra link',
 
 		// ── HomeView ──────────────────────────────────────────
 		'homeView.linksCount': ({ count }) => `${count} link salvat${count === 1 ? 'o' : 'i'}`,
@@ -375,7 +351,6 @@ const translations = {
 
 		// ── Pill ──────────────────────────────────────────────
 		'pill.removeAriaLabel': ({ label }) => `Rimuovi tag ${label}`,
-		'options.headerLinkRemove': ({ label }) => `Rimuovi ${label}`,
 
 		// ── LinkItem ──────────────────────────────────────────
 		'linkItem.favorite': 'Aggiungi ai preferiti',
@@ -411,32 +386,13 @@ const translations = {
 		'options.footer.caption': 'Salva link per Chrome.',
 		'options.privacySection': 'Privacy Policy',
 		'options.privacyOpen': 'Leggi la Privacy Policy',
-		'options.preferencesSection': 'Preferenze',
-		'options.defaultView': 'Vista predefinita',
-		'options.defaultViewDesc': 'Layout all\'apertura di una nuova scheda.',
-		'options.showDescription': 'Mostra descrizione',
-		'options.showDescriptionDesc': 'Mostra la descrizione (generata da AI o della pagina) sotto ogni link salvato.',
-		'options.newtabEnabled': 'Schermata nuova scheda completa',
-		'options.newtabEnabledDesc': 'Se attivo, l\'apertura di una nuova scheda mostra l\'app Amber completa. Se disattivo, viene mostrata solo la sidebar (link, cartelle, tag e preferiti).',
-		'options.headerLinksSection': 'Link nell\'header',
-		'options.headerLinksDesc': 'Link rapidi mostrati nell\'header.',
-		'options.headerLinkLabel': 'Etichetta',
-		'options.headerLinkUrl': 'URL',
-		'options.headerLinkAdd': 'Aggiungi',
-		'options.headerLinkEmpty': 'Nessun link aggiunto.',
-		'options.headerLinkInvalidUrl': 'Inserisci un URL valido (https://...)',
+		'options.privacyDesc': 'Apre la policy sempre aggiornata su GitHub.',
 		'options.collectionSection': 'La tua collezione',
 		'options.statLinks': 'link salvati',
 		'options.statFavorites': 'preferiti',
 		'options.exportLinks': 'Esporta link',
 		'options.exportDesc': 'Scarica tutti i link salvati come JSON.',
 		'options.exportBtn': 'Esporta JSON',
-		'options.importSection': 'Importa bookmark',
-		'options.importDesc': 'Importa da un\'esportazione bookmark del browser (file HTML).',
-		'options.importBtn': 'Scegli file',
-		'options.importProgress': 'Importazione… {done}/{total}',
-		'options.importDone': 'Completato — {count} importati, {skipped} duplicati ignorati',
-		'options.importError': 'File non leggibile. Assicurati sia un export HTML dei bookmark.',
 
 		// ── Empty states ─────────────────────────────────────
 		'emptyState.noLinks.title': 'Salva il tuo primo link',

@@ -29,7 +29,6 @@ export async function getManifest() {
       'tabs',
       'activeTab',
       'scripting',
-      'cookies',
       'sidePanel',
     ],
     side_panel: {
