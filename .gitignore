@@ -12,6 +12,7 @@
 .env
 .env.local
 .env.*.local
+.admin/
 
 # Node (root level, if any tools added later)
 node_modules/
@@ -20,3 +21,7 @@ node_modules/
 graphify-out/
 .graphify_cached.*
 .graphify_uncached.*
+
+# Google
+google-services.json
+

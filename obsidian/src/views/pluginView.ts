@@ -114,18 +114,20 @@ export default class PluginView extends ItemView {
       if (!link) return;
       const existing = link.metadata?.tags ?? [];
       if (existing.includes(tag) || existing.length >= 10) return;
-      await this.linksService?.updateLink(id, {
-        metadata: { ...link.metadata, tags: [...existing, tag] },
-      });
+      // COMMENTED: Auto-save disabled temporarily
+      // await this.linksService?.updateLink(id, {
+      //   metadata: { ...link.metadata, tags: [...existing, tag] },
+      // });
     };
 
     const onDeleteTag = async (id: string, tag: string) => {
       const link = links.find((l) => l.id === id);
       if (!link) return;
       const updated = (link.metadata?.tags ?? []).filter((t) => t !== tag);
-      await this.linksService?.updateLink(id, {
-        metadata: { ...link.metadata, tags: updated },
-      });
+      // COMMENTED: Auto-save disabled temporarily
+      // await this.linksService?.updateLink(id, {
+      //   metadata: { ...link.metadata, tags: updated },
+      // });
     };
 
     const onToggleFavorite = async (id: string) => {
@@ -137,15 +139,18 @@ export default class PluginView extends ItemView {
     };
 
     const onGlobalRenameTag = async (oldTag: string, newTag: string) => {
-      await this.linksService?.renameTag(oldTag, newTag);
+      // COMMENTED: Auto-save disabled temporarily
+      // await this.linksService?.renameTag(oldTag, newTag);
     };
 
     const onGlobalDeleteTag = async (tag: string) => {
-      await this.linksService?.deleteTag(tag);
+      // COMMENTED: Auto-save disabled temporarily
+      // await this.linksService?.deleteTag(tag);
     };
 
     const onGlobalMergeTag = async (fromTag: string, toTag: string) => {
-      await this.linksService?.mergeTag(fromTag, toTag);
+      // COMMENTED: Auto-save disabled temporarily
+      // await this.linksService?.mergeTag(fromTag, toTag);
     };
 
     switch (this.activeTab) {

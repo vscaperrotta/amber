@@ -133,9 +133,10 @@ class LinkProvider extends ChangeNotifier {
       final updated = link.tags
           .map((t) => t == oldTag ? trimmed : t)
           .toList();
-      await _repository.updateLink(link.copyWith(tags: updated));
+      // COMMENTED: Auto-save disabled temporarily
+      // await _repository.updateLink(link.copyWith(tags: updated));
     }
-    await loadLinks();
+    // await loadLinks();
   }
 
   /// Removes [tag] from every link that has it.
@@ -143,9 +144,10 @@ class LinkProvider extends ChangeNotifier {
     final affected = _links.where((l) => l.tags.contains(tag)).toList();
     for (final link in affected) {
       final updated = link.tags.where((t) => t != tag).toList();
-      await _repository.updateLink(link.copyWith(tags: updated));
+      // COMMENTED: Auto-save disabled temporarily
+      // await _repository.updateLink(link.copyWith(tags: updated));
     }
-    await loadLinks();
+    // await loadLinks();
   }
 
   /// Replaces [fromTag] with [toTag] on all affected links (deduplicates).
@@ -158,9 +160,10 @@ class LinkProvider extends ChangeNotifier {
           .map((t) => t == fromTag ? target : t)
           .toSet()
           .toList();
-      await _repository.updateLink(link.copyWith(tags: updated));
+      // COMMENTED: Auto-save disabled temporarily
+      // await _repository.updateLink(link.copyWith(tags: updated));
     }
-    await loadLinks();
+    // await loadLinks();
   }
 
   /// Adds [tag] to the links identified by [linkIds].
@@ -170,11 +173,12 @@ class LinkProvider extends ChangeNotifier {
     for (final id in linkIds) {
       final link = _links.firstWhere((l) => l.id == id, orElse: () => throw StateError('Not found'));
       if (!link.tags.contains(trimmed)) {
-        await _repository.updateLink(
-            link.copyWith(tags: [...link.tags, trimmed]));
+        // COMMENTED: Auto-save disabled temporarily
+        // await _repository.updateLink(
+        //     link.copyWith(tags: [...link.tags, trimmed]));
       }
     }
-    await loadLinks();
+    // await loadLinks();
   }
 
   /// Removes [tag] from the links identified by [linkIds].
@@ -184,10 +188,11 @@ class LinkProvider extends ChangeNotifier {
     for (final id in linkIds) {
       final link = _links.firstWhere((l) => l.id == id, orElse: () => throw StateError('Not found'));
       if (link.tags.contains(trimmed)) {
-        await _repository.updateLink(
-            link.copyWith(tags: link.tags.where((t) => t != trimmed).toList()));
+        // COMMENTED: Auto-save disabled temporarily
+        // await _repository.updateLink(
+        //     link.copyWith(tags: link.tags.where((t) => t != trimmed).toList()));
       }
     }
-    await loadLinks();
+    // await loadLinks();
   }
 }
