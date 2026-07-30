@@ -48,11 +48,12 @@ class CollectionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> addCollection(String name, {String? parentId}) async {
+  Future<CollectionItem> addCollection(String name, {String? parentId}) async {
     final color = _kCollectionColors[_collections.length % _kCollectionColors.length];
     final collection = CollectionItem(name: name, parentId: parentId, color: color);
     await _repository.addCollection(collection);
     await loadCollections();
+    return collection;
   }
 
   Future<void> renameCollection(String id, String name) async {

@@ -8,6 +8,9 @@ import '../theme/app_colors.dart';
 import '../utils/i18n.dart';
 import '../widgets/loading_spinner.dart';
 import '../theme/cool_icons.dart';
+import '../utils/collection_dialogs.dart';
+
+const _kNewCollectionValue = '__new_collection__';
 
 class AddLinkScreen extends StatefulWidget {
   final String? initialUrl;
@@ -269,7 +272,6 @@ class _AddLinkScreenState extends State<AddLinkScreen> {
               Consumer<CollectionProvider>(
                 builder: (context, collectionProvider, _) {
                   final collections = collectionProvider.collections;
-                  if (collections.isEmpty) return const SizedBox.shrink();
                   return DropdownButtonFormField<String>(
                     value: _selectedCollectionId,
                     decoration: InputDecoration(
@@ -286,8 +288,29 @@ class _AddLinkScreenState extends State<AddLinkScreen> {
                         value: col.id,
                         child: Text(col.name),
                       )),
+                      DropdownMenuItem(
+                        value: _kNewCollectionValue,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(CoolIcons.add, size: 16),
+                            const SizedBox(width: 6),
+                            Text(t('collections.add')),
+                          ],
+                        ),
+                      ),
                     ],
-                    onChanged: (val) => setState(() => _selectedCollectionId = val),
+                    onChanged: (val) {
+                      if (val == _kNewCollectionValue) {
+                        showAddCollectionDialog(
+                          context,
+                          onCreated: (created) =>
+                              setState(() => _selectedCollectionId = created.id),
+                        );
+                        return;
+                      }
+                      setState(() => _selectedCollectionId = val);
+                    },
                   );
                 },
               ),

@@ -12,8 +12,21 @@ import 'dialogs.dart';
 /// the Options "Gestisci cartelle" screen so both drive the same provider
 /// calls through the same prompts instead of maintaining two copies.
 
-void showAddCollectionDialog(BuildContext context) {
+void showAddCollectionDialog(
+  BuildContext context, {
+  void Function(CollectionItem)? onCreated,
+}) {
   final controller = TextEditingController();
+  final provider = context.read<CollectionProvider>();
+
+  Future<void> submit(String value) async {
+    final val = value.trim();
+    if (val.isEmpty) return;
+    Navigator.pop(context);
+    final created = await provider.addCollection(val);
+    onCreated?.call(created);
+  }
+
   showDialog(
     context: context,
     builder: (ctx) => AlertDialog(
@@ -23,12 +36,7 @@ void showAddCollectionDialog(BuildContext context) {
         autofocus: true,
         decoration: InputDecoration(hintText: t('collections.nameHint')),
         textCapitalization: TextCapitalization.sentences,
-        onSubmitted: (val) {
-          if (val.trim().isNotEmpty) {
-            ctx.read<CollectionProvider>().addCollection(val.trim());
-            Navigator.pop(ctx);
-          }
-        },
+        onSubmitted: submit,
       ),
       actions: [
         TextButton(
@@ -36,13 +44,7 @@ void showAddCollectionDialog(BuildContext context) {
           child: Text(t('common.cancel')),
         ),
         TextButton(
-          onPressed: () {
-            final val = controller.text.trim();
-            if (val.isNotEmpty) {
-              ctx.read<CollectionProvider>().addCollection(val);
-              Navigator.pop(ctx);
-            }
-          },
+          onPressed: () => submit(controller.text),
           child: Text(t('collections.add')),
         ),
       ],
