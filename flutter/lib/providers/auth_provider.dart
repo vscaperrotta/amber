@@ -38,6 +38,13 @@ class AuthProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
       return false;
+    } on FirebaseException catch (e) {
+      // ponytail: covers core/no-app etc. — a misconfigured build must not
+      // masquerade as a generic "try again" error.
+      _error = _mapFirebaseError(e.code);
+      _isLoading = false;
+      notifyListeners();
+      return false;
     } catch (e) {
       debugPrint('[AuthProvider] unexpected auth error: $e');
       _error = t('auth.errorUnexpected');
@@ -58,6 +65,13 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } on FirebaseAuthException catch (e) {
+      _error = _mapFirebaseError(e.code);
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    } on FirebaseException catch (e) {
+      // ponytail: covers core/no-app etc. — a misconfigured build must not
+      // masquerade as a generic "try again" error.
       _error = _mapFirebaseError(e.code);
       _isLoading = false;
       notifyListeners();
