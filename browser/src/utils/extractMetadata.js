@@ -1,30 +1,3 @@
-const STOPWORDS = new Set([
-	'the','a','an','is','in','it','of','to','and','or','for','on','at','by','with',
-	'from','this','that','are','was','be','as','we','i','you','he','she','they','not',
-	'but','so','if','no','do','up','my','me','his','her','our','all','can','one','has',
-	'have','had','its','also','about','more','been','were','will','would','there','their',
-	'what','when','how','which','who','than','then','into','over','after','just','out',
-	'some','your','may','use','like','only','new','other','time','very','even','most',
-]);
-
-/**
- * Estrae le top-N parole dal testo per frequenza, escludendo stopword e parole brevi.
- * @param {string} text
- * @param {number} n
- * @returns {string[]}
- */
-function topWordsByFrequency(text, n = 8) {
-	const words = text.toLowerCase().match(/\b[a-z][a-z0-9]{2,}\b/g) ?? [];
-	const freq = new Map();
-	for (const w of words) {
-		if (!STOPWORDS.has(w)) freq.set(w, (freq.get(w) ?? 0) + 1);
-	}
-	return [...freq.entries()]
-		.sort((a, b) => b[1] - a[1])
-		.slice(0, n)
-		.map(([w]) => w);
-}
-
 const JSON_LD_TYPES = new Set([
 	'Article', 'NewsArticle', 'BlogPosting', 'TechArticle',
 	'Product', 'Recipe', 'VideoObject', 'WebPage', 'SoftwareApplication',
@@ -137,7 +110,7 @@ function findLargestImg(doc) {
  *
  * @param {Document} doc
  * @param {string} baseUrl - URL base per risolvere URL relativi
- * @param {string} bodyText - Testo estratto dal body (opzionale, migliora tag generation)
+ * @param {string} bodyText - Testo estratto dal body (opzionale, usato per readingTime)
  * @returns {{
  *   description: string, thumbnail: string, favicon: string, siteName: string,
  *   tags: string[], canonicalUrl: string, author: string,
@@ -229,36 +202,8 @@ export function extractMetadata(doc = document, baseUrl = '', bodyText = '') {
 	const readingTime = wordCount > 0 ? Math.ceil(wordCount / 200) : 0;
 
 	// ── Tags ─────────────────────────────────────────────────────────────────
-	const rawTags = new Set();
-
-	// keywords meta
-	const keywords = getMeta('meta[name="keywords"]');
-	if (keywords) {
-		keywords.split(',').map(k => k.trim().toUpperCase()).filter(Boolean).forEach(k => rawTags.add(k));
-	}
-
-	// article:tag (può apparire più volte)
-	try {
-		doc.querySelectorAll('meta[property="article:tag"]').forEach(el => {
-			const v = el.getAttribute('content');
-			if (v?.trim()) rawTags.add(v.trim().toUpperCase());
-		});
-	} catch { /* noop */ }
-
-	// domain slug (es. "github" da github.com)
-	try {
-		const hostname = new URL(baseUrl).hostname.replace(/^www\./, '');
-		const slug = hostname.split('.')[0];
-		if (slug && slug.length > 1) rawTags.add(slug.toUpperCase());
-	} catch { /* noop */ }
-
-	// top parole dal body text se disponibile
-	if (bodyText) {
-		const titleText = getMeta('meta[property="og:title"]', 'meta[name="title"]') || '';
-		topWordsByFrequency(`${titleText} ${bodyText}`, 8).forEach(w => rawTags.add(w.toUpperCase()));
-	}
-
-	const tags = [...rawTags].slice(0, 10);
+	// Nessuna generazione automatica: i tag si inseriscono a mano dal TagEditor.
+	const tags = [];
 
 	// screenshot: null — campo predisposto, viene popolato dal background service worker
 	// come fallback finale quando nessuna fonte sopra ha prodotto una thumbnail
