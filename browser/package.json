@@ -2,7 +2,7 @@
   "name": "amber-chrome-extension",
   "displayName": "Amber",
   "description": "A Chrome extension that allows you to save and organize your favorite websites in a simple and intuitive way.",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "private": true,
   "author": "Vittorio Scaperrotta",
   "license": "MIT",
